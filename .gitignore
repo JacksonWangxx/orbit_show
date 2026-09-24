@@ -1,0 +1,15 @@
+# 操作系统
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+
+# 临时与备份
+*.bak
+*~
+
+# 本机卫星库导出（含观测站精确坐标与天线信息，不公开）
+卫星配置.json
