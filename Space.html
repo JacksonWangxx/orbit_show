@@ -1208,6 +1208,14 @@
         <div><label>海拔高度 (m)</label><input type="number" id="stAlt" step="1" placeholder="50"></div>
         <div><label>起跟仰角 (°)</label><input type="number" id="stMinEl" step="1" min="0" max="90" placeholder="10"></div>
       </div>
+
+      <div style="margin-top:12px;">
+        <label>地面遮蔽角（每行一段，可留空）</label>
+        <textarea id="stMask" class="data-textarea" style="min-height:88px;" oninput="updateMaskInfo()"
+          placeholder="例：&#10;300-282 10&#10;282-262 7&#10;262-250 36&#10;&#10;格式：起始方位-结束方位 遮蔽仰角&#10;从起始方位沿逆时针（方位角递减）走到结束方位。&#10;未列出的方位视为无遮挡；方位与仰角都填数字即可，行内其它文字会被忽略。"></textarea>
+        <div class="hint" id="stMaskInfo" style="margin-top:6px;">留空 = 无遮挡。保存时会校验覆盖面，重叠处取较大遮蔽角。</div>
+      </div>
+
       <div class="row">
         <button id="btnStationSave" onclick="saveStationForm()">添加站址</button>
         <button class="ghost tiny" id="btnStationCancel" onclick="cancelStationEdit()" style="display:none;">取消编辑</button>
@@ -1377,7 +1385,8 @@
         <span style="color:#4ade80;">●</span> 入境 &nbsp;
         <span style="color:#f87171;">●</span> 出境 &nbsp;
         <span style="color:#facc15;">◆</span> 最大仰角 &nbsp;
-        <span style="color:#d7e6f5;">▲</span> 运动方向
+        <span style="color:#d7e6f5;">▲</span> 运动方向 &nbsp;
+        <span style="color:#f87171;">▨</span> 遮挡区（低于遮蔽角）
       </span>
     </div>
   </div>
@@ -1990,7 +1999,7 @@ const STORAGE_KEY_MINMAXEL = 'leo_minmaxel_v1';
 const CONFIG_VERSION = 4;
 const toRad = d => d * DEG;
 
-const DEFAULT_STATION = { lat: 39.9, lon: 116.4, alt: 50, minEl: 10 };
+const DEFAULT_STATION = { lat: 39.9, lon: 116.4, alt: 50, minEl: 10, mask: [] };
 const DEFAULT_DURATION = '24';
 
 // ==================== NORAD 编录号（Alpha-5） ====================
@@ -2238,6 +2247,121 @@ function saveSats(sats) {
   localStorage.setItem(STORAGE_KEY_SATS, JSON.stringify(sats));
 }
 
+// ==================== 地面遮蔽角（方位角遮蔽） ====================
+// 站址可录入若干方位扇区；目标在该方位上低于该扇区的遮蔽角即被地面遮挡。
+// 扇区表示：从 az0 起沿逆时针（方位角递减）走到 az1。
+//   az0 >  az1：覆盖 [az1, az0]（不跨 0°）
+//   az0 <  az1：覆盖 [0, az0] ∪ [az1, 360]（跨 0°）
+//   az0 === az1：覆盖整圈
+// 允许只覆盖部分方位（未覆盖方位视为无遮挡 = 0°），也允许重叠（重叠处取较大遮蔽角，保守）。
+// 注意：绘制与计算必须共用 maskElevationAt 这一个判定，否则两处结论会悄悄不一致。
+
+function normalizeMaskSector(v) {
+  if (!v || typeof v !== 'object') return null;
+  const az0 = +v.az0, az1 = +v.az1, minEl = +v.minEl;
+  if (!Number.isFinite(az0) || !Number.isFinite(az1) || !Number.isFinite(minEl)) return null;
+  if (minEl < 0 || minEl > 90) return null;
+  return { az0: ((az0 % 360) + 360) % 360, az1: ((az1 % 360) + 360) % 360, minEl };
+}
+
+function normalizeMask(v) {
+  return Array.isArray(v) ? v.map(normalizeMaskSector).filter(Boolean) : [];
+}
+
+function sectorCovers(sec, az) {
+  const a = ((az % 360) + 360) % 360;
+  if (sec.az0 === sec.az1) return true;                       // 整圈
+  if (sec.az0 > sec.az1) return a >= sec.az1 && a <= sec.az0; // 不跨 0°：[az1, az0]
+  return a <= sec.az0 || a >= sec.az1;                        // 跨 0°：[0, az0] ∪ [az1, 360]
+}
+
+// 该方位上的遮蔽角；无扇区覆盖返回 0
+function maskElevationAt(mask, az) {
+  if (!Array.isArray(mask) || mask.length === 0) return 0;
+  let m = 0;
+  for (const sec of mask) if (sec.minEl > m && sectorCovers(sec, az)) m = sec.minEl;
+  return m;
+}
+
+// 给定方位(°)、仰角(°)，判断是否落在遮挡区内
+function isBlockedLook(el, az, mask) {
+  const m = maskElevationAt(mask, az);
+  return m > 0 && el < m;
+}
+
+// 在 1° 栅格上找出满足条件的连续方位段；返回 [[起, 止], ...]，可跨 0°
+function maskRuns(count, pred) {
+  if (count.every(pred)) return [[0, 359]];
+  if (!count.some(pred)) return [];
+  const seed = count.findIndex(c => !pred(c));   // 从不满足处起扫，保证线性扫描不跨 0°
+  const runs = [];
+  let start = -1;
+  for (let i = 0; i <= 360; i++) {
+    const idx = (seed + i) % 360;
+    const ok = i < 360 ? pred(count[idx]) : false;   // 末位哨兵负责收尾
+    if (ok) { if (start < 0) start = idx; }
+    else if (start >= 0) { runs.push([start, (idx + 359) % 360]); start = -1; }
+  }
+  return runs;
+}
+
+// runs 里存的是 1° 栅格下标，下标 a 代表方位区间 [a, a+1)，故显示时终点 +1
+const fmtAzRanges = runs => runs.map(([a, b]) =>
+  (a === 0 && b === 359) ? '整圈' : `${a}°–${b + 1}°`).join('、');
+
+// 覆盖情况校验：报出缝隙与重叠，供表单与站址列表提示（不阻止保存）。
+// 采样点取 a+0.5 而不是 a：相邻扇区的公共边界（如 300→282 与 282→262 共享 282°）
+// 若按整数采样会被算成"重叠"，但边界只是一个零测度的点，不该计。半度采样天然避开。
+function analyzeMask(mask) {
+  const sectors = normalizeMask(mask);
+  const count = new Array(360).fill(0);
+  for (const sec of sectors) for (let a = 0; a < 360; a++) if (sectorCovers(sec, a + 0.5)) count[a]++;
+  const coveredDeg = count.filter(c => c > 0).length;
+  const gaps = maskRuns(count, c => c === 0);
+  const overlaps = maskRuns(count, c => c > 1);
+  return { sectors: sectors.length, coveredDeg, gapDeg: 360 - coveredDeg, gaps, overlaps,
+           complete: coveredDeg === 360 && overlaps.length === 0 };
+}
+
+function maskWarnText(a) {
+  const parts = [];
+  if (a.gaps.length) parts.push(`未覆盖 ${a.gapDeg}°（${fmtAzRanges(a.gaps)}）`);
+  if (a.overlaps.length) parts.push(`扇区重叠（${fmtAzRanges(a.overlaps)}）`);
+  return parts.join('；');
+}
+
+// 站址列表行里的紧凑摘要
+function maskSummary(mask) {
+  const a = analyzeMask(mask);
+  if (!a.sectors) return '';
+  const warn = maskWarnText(a);
+  return `，遮蔽 ${a.sectors} 段${warn ? `（${warn}）` : ''}`;
+}
+
+// 粘贴解析：每行取前三个数字为 [起始方位, 结束方位, 遮蔽角]。
+// 兼容 "300-282遮挡10°" / "300-282, 10" / "300 282 10" 等写法；空行与 # 注释跳过。
+// 方位与仰角都非负，故按无符号数字提取，行内的 "-" 一律当作分隔符。
+function parseMaskText(text) {
+  const mask = [], bad = [];
+  for (const raw of String(text || '').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const nums = line.match(/\d+(?:\.\d+)?/g);
+    if (!nums || nums.length < 3) { bad.push(line); continue; }
+    const [a, b, m] = nums.slice(0, 3).map(Number);
+    if (a > 360 || b > 360 || m > 90) { bad.push(line); continue; }
+    const sec = normalizeMaskSector({ az0: a, az1: b, minEl: m });
+    if (!sec) { bad.push(line); continue; }
+    mask.push(sec);
+  }
+  return { mask, bad };
+}
+
+// 编辑时把已存的遮蔽角回填进文本框
+function maskToText(mask) {
+  return normalizeMask(mask).map(s => `${s.az0}-${s.az1} ${s.minEl}°`).join('\n');
+}
+
 // ==================== 本地存储：站址（多站） ====================
 let editingStationId = null;
 
@@ -2253,6 +2377,9 @@ function normalizeStation(s) {
     lon: Number.isFinite(+s.lon) ? +s.lon : DEFAULT_STATION.lon,
     alt: Number.isFinite(+s.alt) ? +s.alt : DEFAULT_STATION.alt,
     minEl: Number.isFinite(+s.minEl) ? +s.minEl : DEFAULT_STATION.minEl,
+    // 地面遮蔽角扇区；旧数据没有该字段 → 空数组（无遮挡），向后兼容。
+    // 注意必须显式列出：本函数构造的是固定字段的对象，未列出的字段会被静默丢弃。
+    mask: normalizeMask(s.mask),
     selected: s.selected !== false,
   };
 }
@@ -2307,7 +2434,7 @@ function renderStationList() {
         onchange="toggleStation('${id}', this.checked)">
       <span class="sat-name">
         <span class="name-text">${escapeHtml(s.name)}</span>
-        <span class="sat-orig">${s.lat.toFixed(4)}°, ${s.lon.toFixed(4)}°, ${s.alt}m, 起跟 ${s.minEl}°</span>
+        <span class="sat-orig">${s.lat.toFixed(4)}°, ${s.lon.toFixed(4)}°, ${s.alt}m, 起跟 ${s.minEl}°${escapeHtml(maskSummary(s.mask))}</span>
       </span>
       <button class="edit-btn" title="编辑站址" onclick="editStation('${id}')">✎</button>
       <button class="del-btn" title="删除站址" onclick="delStation('${id}')">×</button>
@@ -2357,6 +2484,8 @@ function editStation(id) {
   document.getElementById('stLon').value = s.lon;
   document.getElementById('stAlt').value = s.alt;
   document.getElementById('stMinEl').value = s.minEl;
+  document.getElementById('stMask').value = maskToText(s.mask);
+  updateMaskInfo();
   document.getElementById('stationFormTitle').textContent = '✎ 编辑站址：' + s.name;
   document.getElementById('stationFormTitle').closest('details').open = true;
   document.getElementById('btnStationSave').textContent = '保存修改';
@@ -2377,6 +2506,31 @@ function resetStationForm() {
   document.getElementById('stLon').value = '';
   document.getElementById('stAlt').value = '50';
   document.getElementById('stMinEl').value = '10';
+  document.getElementById('stMask').value = '';
+  updateMaskInfo();
+}
+
+// 遮蔽角输入框的即时校验：粘进去立刻能看到解析结果与覆盖问题
+function updateMaskInfo() {
+  const el = document.getElementById('stMaskInfo');
+  if (!el) return;
+  const { mask, bad } = parseMaskText(document.getElementById('stMask').value);
+  if (bad.length) {
+    el.textContent = `${bad.length} 行无法解析：${bad.slice(0, 2).join(' / ')}${bad.length > 2 ? ' …' : ''}` +
+                     `（每行需要 起始方位-结束方位 遮蔽仰角 三个数字）`;
+    el.style.color = '#ffadb4';
+    return;
+  }
+  if (!mask.length) {
+    el.textContent = '留空 = 无遮挡。格式：起始方位-结束方位 遮蔽仰角，每行一段。';
+    el.style.color = '';
+    return;
+  }
+  const a = analyzeMask(mask);
+  const warn = maskWarnText(a);
+  el.textContent = `已解析 ${a.sectors} 段，覆盖 ${a.coveredDeg}°` +
+                   (warn ? `；${warn}` : '（完整覆盖一圈，无重叠）');
+  el.style.color = warn ? '#ffe09a' : '#9ef5d1';
 }
 
 function saveStationForm() {
@@ -2392,21 +2546,31 @@ function saveStationForm() {
   if (isNaN(minEl) || minEl < 0 || minEl > 90) return setStatus('起跟仰角必须在 0 到 90 度之间', 'error');
   const altN = isNaN(alt) ? 0 : alt;
 
+  // 遮蔽角：解析不出来的行直接拦下（静默丢弃会丢数据）；覆盖有缝隙/重叠则只告警
+  const { mask, bad } = parseMaskText(document.getElementById('stMask').value);
+  if (bad.length) {
+    return setStatus(`地面遮蔽角有 ${bad.length} 行无法解析：${bad.slice(0, 3).join(' / ')}` +
+                     `${bad.length > 3 ? ' …' : ''}（每行需要 起始方位-结束方位 遮蔽仰角 三个数字）`, 'error');
+  }
+  const maskInfo = analyzeMask(mask);
+  const maskNote = maskInfo.sectors ? `，遮蔽 ${maskInfo.sectors} 段` : '';
+  const maskWarn = maskWarnText(maskInfo);
+
   const stations = loadStations();
   if (editingStationId) {
     const s = stations.find(x => x.id === editingStationId);
     if (!s) { cancelStationEdit(); return; }
-    Object.assign(s, { name, lat, lon, alt: altN, minEl });
+    Object.assign(s, { name, lat, lon, alt: altN, minEl, mask });
     saveStations(stations);
     cancelStationEdit();
     renderStationList();
-    setStatus(`站址已更新：${name}`, 'success');
+    setStatus(`站址已更新：${name}${maskNote}${maskWarn ? `；注意：${maskWarn}` : ''}`, maskWarn ? 'error' : 'success');
   } else {
-    stations.push(normalizeStation({ name, lat, lon, alt: altN, minEl, selected: true }));
+    stations.push(normalizeStation({ name, lat, lon, alt: altN, minEl, mask, selected: true }));
     saveStations(stations);
     resetStationForm();
     renderStationList();
-    setStatus(`已添加站址：${name}`, 'success');
+    setStatus(`已添加站址：${name}${maskNote}${maskWarn ? `；注意：${maskWarn}` : ''}`, maskWarn ? 'error' : 'success');
   }
 }
 
@@ -3378,7 +3542,22 @@ function binarySearchCrossing(satrec, observerGd, thresholdDeg, t1, t2, goingUp)
   return new Date((lo + hi) / 2);
 }
 
-function predictPasses(satrec, observerGd, minEl, startDate, hoursAhead) {
+// 与 binarySearchCrossing 同构，但判定的是「仰角 − 该方位的遮蔽角」的符号（≥0 为可接收）。
+// 单独一个函数而不改写 binarySearchCrossing，避免波及既有的升降交点计算。
+function binarySearchMask(satrec, observerGd, mask, t1, t2, goingUp) {
+  let lo = t1.getTime(), hi = t2.getTime();
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    const look = getLook(satrec, observerGd, new Date(mid));
+    if (!look) break;
+    const clear = look.elevation >= maskElevationAt(mask, look.azimuth);
+    if (goingUp) { clear ? hi = mid : lo = mid; }
+    else         { clear ? lo = mid : hi = mid; }
+  }
+  return new Date((lo + hi) / 2);
+}
+
+function predictPasses(satrec, observerGd, minEl, startDate, hoursAhead, mask) {
   const passes = [];
   const stepMs = 30 * 1000;
   const endTime = startDate.getTime() + hoursAhead * 3600 * 1000;
@@ -3422,10 +3601,44 @@ function predictPasses(satrec, observerGd, minEl, startDate, hoursAhead) {
         }
       }
       const exitLook = getLook(satrec, observerGd, exitTime);
+      const duration = exitTime.getTime() - riseTime.getTime();
+
+      // 地面遮蔽：逐采样点判「仰角是否低于该方位的遮蔽角」，跨越点二分细化到秒级。
+      // 遮挡只做增量标注，不参与升降交点、过境是否成立、排序 —— 这些仍只由 minEl 决定。
+      const blockedSpans = [];
+      if (mask && mask.length) {
+        const clearAt = p => {
+          const l = getLook(satrec, observerGd, new Date(p));
+          return l ? l.elevation - maskElevationAt(mask, l.azimuth) : null;
+        };
+        let open = null, prevT = null, prevClear = true;
+        for (const pt of track) {
+          const c = clearAt(pt.t);
+          const clear = c == null || c >= 0;   // 取不到时按可接收处理，不凭空判定为遮挡
+          if (!clear && open == null) {
+            open = (prevT != null && prevClear)
+              ? binarySearchMask(satrec, observerGd, mask, new Date(prevT), new Date(pt.t), false).getTime()
+              : pt.t;
+          } else if (clear && open != null) {
+            const tEnd = (prevT != null && !prevClear)
+              ? binarySearchMask(satrec, observerGd, mask, new Date(prevT), new Date(pt.t), true).getTime()
+              : pt.t;
+            if (tEnd > open) blockedSpans.push({ t0: open, t1: tEnd });
+            open = null;
+          }
+          prevT = pt.t;
+          prevClear = clear;
+        }
+        if (open != null && exitTime.getTime() > open) {
+          blockedSpans.push({ t0: open, t1: exitTime.getTime() });
+        }
+      }
+      const blockedMs = blockedSpans.reduce((s, x) => s + (x.t1 - x.t0), 0);
+      const clearMs = Math.max(0, duration - blockedMs);
 
       passes.push({
         riseTime, exitTime,
-        duration: exitTime.getTime() - riseTime.getTime(),
+        duration,
         maxElevation: maxEl,
         maxElevationTime: new Date(tPeak),
         riseAzimuth: riseLook ? riseLook.azimuth : 0,
@@ -3433,6 +3646,11 @@ function predictPasses(satrec, observerGd, minEl, startDate, hoursAhead) {
         peakAzimuth: peakAz,
         minEl,
         track,
+        mask: mask || [],
+        blockedSpans,
+        blockedMs,
+        clearMs,
+        fullyBlocked: (mask && mask.length) ? clearMs <= 0 : false,
       });
       t = t2; prevAbove = false;
     } else {
@@ -3492,7 +3710,7 @@ async function runPrediction() {
           continue;
         }
         try {
-          let passes = predictPasses(item.satrec, observerGd, st.minEl, start, hours);
+          let passes = predictPasses(item.satrec, observerGd, st.minEl, start, hours, st.mask);
           if (minMaxEl > 0) passes = passes.filter(p => p.maxElevation >= minMaxEl);
           results.push({ sat: item.sat, station: st, passes, error: null });
         } catch (e) {
@@ -3512,6 +3730,14 @@ async function runPrediction() {
   } finally {
     btn.disabled = false;
   }
+}
+
+// 各站址的起跟仰角可能不同，空结果提示里给出实际用到的阈值
+// （此处原先引用 params.minEl，但 params 里从来没有这个字段，会显示成 "undefined"）
+function minElLabel(stations) {
+  const vals = [...new Set((stations || []).map(s => s.minEl))].sort((a, b) => a - b);
+  if (!vals.length) return DEFAULT_STATION.minEl;
+  return vals.length === 1 ? vals[0] : `${vals[0]}~${vals[vals.length - 1]}`;
 }
 
 function renderResults(results, params, start) {
@@ -3580,7 +3806,7 @@ function renderResults(results, params, start) {
   if (flat.length === 0) {
     const emptyMsg = params.minMaxEl > 0
       ? `所选卫星在未来 ${params.hours} 小时内均无最高仰角 ≥ ${params.minMaxEl}° 的过境 — 可尝试降低过滤仰角`
-      : `所选卫星在未来 ${params.hours} 小时内均无仰角 ≥ ${params.minEl}° 的过境`;
+      : `所选卫星在未来 ${params.hours} 小时内均无仰角 ≥ ${minElLabel(params.stations)}° 的过境`;
     html += `<div class="empty">${emptyMsg}</div>`;
     el.innerHTML = html;
     lastData = null;
@@ -3588,14 +3814,22 @@ function renderResults(results, params, start) {
     return;
   }
 
+  // 只有配了地面遮蔽角的站址才多出「可接收」一列，没有遮蔽角的用户看到的表格与改动前完全一致
+  const hasMask = flat.some(e => e.pass.mask && e.pass.mask.length);
+
   html += `<div class="table-shell"><table><thead><tr>
     <th>#</th><th>站址</th><th>卫星</th><th>入境时间</th><th>出境时间</th>
-    <th>持续时间</th><th>最大仰角</th><th>入境方位</th><th>出境方位</th>
+    <th>持续时间</th>${hasMask ? '<th>可接收</th>' : ''}<th>最大仰角</th><th>入境方位</th><th>出境方位</th>
   </tr></thead><tbody>`;
 
   flat.forEach((entry, i) => {
     const p = entry.pass;
     const color = satColor(entry.sat);
+    const clearMs = p.clearMs != null ? p.clearMs : p.duration;
+    // 全程遮挡最醒目（红），可接收不足一半用黄色提示
+    const clearCell = p.fullyBlocked
+      ? '<span style="color:#f87171;font-weight:600">全程遮挡</span>'
+      : `<span style="color:${clearMs < p.duration * 0.5 ? '#ffe09a' : '#9ef5d1'}">${durationStr(clearMs)}</span>`;
     const c = p.maxElevation > 60 ? '#4ade80' : p.maxElevation > 30 ? '#facc15' : '#9db8d0';
     html += `<tr id="row-${entry.id}" class="pass-row" onclick="selectPass('${entry.id}', true)">
       <td><span class="pass-tag">${i + 1}</span></td>
@@ -3605,6 +3839,7 @@ function renderResults(results, params, start) {
       <td class="time-cell">${formatBJWithLabel(p.riseTime)}</td>
       <td class="time-cell">${formatBJWithLabel(p.exitTime)}</td>
       <td>${durationStr(p.duration)}</td>
+      ${hasMask ? `<td>${clearCell}</td>` : ''}
       <td style="color:${c};font-weight:600">${p.maxElevation.toFixed(1)}°</td>
       <td>${p.riseAzimuth.toFixed(1)}°</td>
       <td>${p.exitAzimuth.toFixed(1)}°</td>
@@ -3620,9 +3855,11 @@ function renderResults(results, params, start) {
 
 // ==================== 导出 Excel ====================
 function buildExportRows() {
+  // 与表格一致：只有存在遮蔽角时才增加可接收相关的列
+  const hasMask = lastData.flat.some(e => e.pass.mask && e.pass.mask.length);
   return lastData.flat.map((entry, i) => {
     const p = entry.pass;
-    return {
+    const row = {
       '序号': i + 1,
       '站址': entry.station.name,
       '卫星': displayName(entry.sat),
@@ -3635,6 +3872,12 @@ function buildExportRows() {
       '入境方位(°)': +p.riseAzimuth.toFixed(1),
       '出境方位(°)': +p.exitAzimuth.toFixed(1),
     };
+    if (hasMask) {
+      row['可接收时长(秒)'] = Math.round((p.clearMs != null ? p.clearMs : p.duration) / 1000);
+      row['遮挡时长(秒)'] = Math.round((p.blockedMs || 0) / 1000);
+      row['全程遮挡'] = p.fullyBlocked ? '是' : '否';
+    }
+    return row;
   });
 }
 
@@ -3930,6 +4173,7 @@ let visState = {
   selected: null, playing: false, progress: null, rp: 0, raf: null,
   animStart: 0, animDur: 9000, animBaseProgress: 0,
   hoverProg: null, dragging: false, satrec: null, observerGd: null,
+  mask: [],                    // 当前选中站址的地面遮蔽角扇区
   skyW: 420, skyH: 420, elW: 640, elH: 240,
 };
 const EL_PAD = { l: 48, r: 22, t: 30, b: 50 };
@@ -4085,6 +4329,40 @@ function skyXY(cx, cy, R, el, az) {
   return { x: cx + r * Math.sin(a), y: cy - r * Math.cos(a) };
 }
 
+// skyXY 以正北为上方，而 canvas 的 arc() 从 +x 轴起顺时针计角，故方位 az 对应画布角 az−90°。
+// 验算：az=0 → −90° → 正上；az=90 → 0° → 正右（东）；az=180 → 90° → 正下。与 skyXY 一致。
+const skyAngle = az => az * DEG - Math.PI / 2;
+
+// 在天图上画出地面遮挡区。投影是线性「仰角 → 半径」，所以等遮蔽角的边界是同心圆，
+// 某方位扇区的遮挡区 = 内半径 (90−遮蔽角)/90·R 到外半径 R 之间的环形扇区。
+function drawSkyMask(ctx, cx, cy, R, mask) {
+  const list = normalizeMask(mask);
+  if (!list.length) return;
+  ctx.save();
+  for (const sec of list) {
+    // 扇区方位区间：跨 0° 时拆成两段画
+    const spans = sec.az0 === sec.az1
+      ? [[0, 360]]
+      : (sec.az0 > sec.az1 ? [[sec.az1, sec.az0]] : [[0, sec.az0], [sec.az1, 360]]);
+    const rIn = (90 - sec.minEl) / 90 * R;
+    if (rIn >= R) continue;                       // 遮蔽角 0° = 不挡，没有面积可画
+    for (const [lo, hi] of spans) {
+      if (hi <= lo) continue;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, skyAngle(lo), skyAngle(hi), false);       // 沿地平圈正向
+      ctx.arc(cx, cy, rIn, skyAngle(hi), skyAngle(lo), true);      // 沿内边界反向，闭合成环形
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(248,113,113,0.14)';
+      ctx.fill();
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(248,113,113,0.55)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 function drawSky() {
   const sel = visState.selected;
   const canvas = document.getElementById('skyCanvas');
@@ -4176,6 +4454,9 @@ function drawSky() {
   const t0 = p.riseTime.getTime(), span = (p.exitTime.getTime() - t0) || 1;
   const tCur = t0 + span * rp;
 
+  // 地面遮挡区（画在轨迹之前，轨迹压在它上面才看得清）
+  drawSkyMask(ctx, cx, cy, R, visState.mask);
+
   // 轨迹底影
   ctx.lineWidth = 2.2;
   ctx.strokeStyle = 'rgba(120,160,200,0.26)';
@@ -4211,10 +4492,14 @@ function drawSky() {
     ctx.restore();
 
     ctx.lineWidth = 2.4;
+    const mask = visState.mask;
     for (let i = 1; i < flown.length; i++) {
       const a = skyXY(cx, cy, R, flown[i - 1].el, flown[i - 1].az);
       const b = skyXY(cx, cy, R, flown[i].el, flown[i].az);
-      ctx.strokeStyle = elColor(Math.max(flown[i - 1].el, flown[i].el));
+      // 两端任一落在遮挡区就把这段标红（不取方位平均值，避免跨 0°/360° 时算错）
+      const blocked = isBlockedLook(flown[i - 1].el, flown[i - 1].az, mask) ||
+                      isBlockedLook(flown[i].el, flown[i].az, mask);
+      ctx.strokeStyle = blocked ? 'rgba(248,113,113,0.95)' : elColor(Math.max(flown[i - 1].el, flown[i].el));
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     }
     ctx.lineWidth = 1;
@@ -4392,6 +4677,35 @@ function drawElev() {
   grad.addColorStop(1, 'rgba(56,189,248,0.02)');
   ctx.fillStyle = grad; ctx.fill();
 
+  // 地面遮挡：遮蔽角随方位变化 → 在这里是一条随时间变化的曲线，而不是水平线。
+  // 曲线与 x 轴之间就是「低于该方位遮蔽角」的区域，轨迹落进去即为被遮挡。
+  const maskList = normalizeMask(visState.mask);
+  if (maskList.length) {
+    const mAt = pt => maskElevationAt(maskList, pt.az);
+    ctx.beginPath();
+    ctx.moveTo(xOf(track[0].t), yOf(mAt(track[0])));
+    for (let i = 1; i < track.length; i++) ctx.lineTo(xOf(track[i].t), yOf(mAt(track[i])));
+    ctx.lineTo(xOf(track[track.length - 1].t), plotB);
+    ctx.lineTo(xOf(track[0].t), plotB);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(248,113,113,0.12)';
+    ctx.fill();
+
+    ctx.save();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = 'rgba(248,113,113,0.6)';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(xOf(track[0].t), yOf(mAt(track[0])));
+    for (let i = 1; i < track.length; i++) ctx.lineTo(xOf(track[i].t), yOf(mAt(track[i])));
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(248,113,113,0.8)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('遮蔽角', clamp(xOf(track[0].t) + 5, 6, cssW - 60), clamp(yOf(mAt(track[0])) - 3, 12, plotB - 2));
+  }
+
   // 仰角曲线
   ctx.beginPath();
   ctx.moveTo(xOf(track[0].t), yOf(track[0].el));
@@ -4403,6 +4717,22 @@ function drawElev() {
   ctx.shadowBlur = 10;
   ctx.stroke();
   ctx.restore();
+
+  // 被遮挡的弧段标红（覆盖在蓝色曲线之上）
+  if (maskList.length) {
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = 'rgba(248,113,113,0.95)';
+    for (let i = 1; i < track.length; i++) {
+      const blocked = isBlockedLook(track[i - 1].el, track[i - 1].az, maskList) ||
+                      isBlockedLook(track[i].el, track[i].az, maskList);
+      if (!blocked) continue;
+      ctx.beginPath();
+      ctx.moveTo(xOf(track[i - 1].t), yOf(track[i - 1].el));
+      ctx.lineTo(xOf(track[i].t), yOf(track[i].el));
+      ctx.stroke();
+    }
+    ctx.lineWidth = 1;
+  }
 
   // 入境 / 最高 / 出境 标记
   const tPeak = p.maxElevationTime.getTime();
@@ -4524,6 +4854,7 @@ function selectPass(id, scrollTo) {
     latitude: toRad(entry.station.lat),
     height: entry.station.alt / 1000,
   };
+  visState.mask = (entry.pass.mask && entry.pass.mask.length) ? entry.pass.mask : [];
   document.getElementById('visTime').textContent = '';
   document.getElementById('btnPlay').textContent = '播放过境过程';
 
@@ -4534,9 +4865,16 @@ function selectPass(id, scrollTo) {
     `<span style="color:#7d9cba;font-size:0.75rem;">#${escapeHtml(entry.sat.noradId)}</span>` +
     ` &nbsp;·&nbsp; ${formatBJ(p.riseTime)} ~ ${formatBJ(p.exitTime)}` +
     ` &nbsp;·&nbsp; 持续 ${durationStr(p.duration)}` +
-    ` &nbsp;·&nbsp; 最大仰角 <strong style="color:${elColor(p.maxElevation)}">${p.maxElevation.toFixed(1)}°</strong>`;
+    ` &nbsp;·&nbsp; 最大仰角 <strong style="color:${elColor(p.maxElevation)}">${p.maxElevation.toFixed(1)}°</strong>` +
+    ((p.mask && p.mask.length)
+      ? (p.fullyBlocked
+          ? ` &nbsp;·&nbsp; <strong style="color:#f87171">全程处于遮挡区</strong>`
+          : ` &nbsp;·&nbsp; 可接收 <strong style="color:#9ef5d1">${durationStr(p.clearMs != null ? p.clearMs : p.duration)}</strong>` +
+            (p.blockedMs > 0 ? ` <span style="color:#f87171">（遮挡 ${durationStr(p.blockedMs)}）</span>` : ''))
+      : '');
   document.getElementById('visSub').innerHTML =
-    `站址 ${escapeHtml(entry.station.name)} (${entry.station.lat.toFixed(4)}°, ${entry.station.lon.toFixed(4)}°) · 入境方位 ${p.riseAzimuth.toFixed(1)}° → 最高点方位 ${p.peakAzimuth.toFixed(1)}° → 出境方位 ${p.exitAzimuth.toFixed(1)}° · 起跟仰角 ${p.minEl}°`;
+    `站址 ${escapeHtml(entry.station.name)} (${entry.station.lat.toFixed(4)}°, ${entry.station.lon.toFixed(4)}°) · 入境方位 ${p.riseAzimuth.toFixed(1)}° → 最高点方位 ${p.peakAzimuth.toFixed(1)}° → 出境方位 ${p.exitAzimuth.toFixed(1)}° · 起跟仰角 ${p.minEl}°` +
+    ((p.mask && p.mask.length) ? ` · 地面遮蔽 ${p.mask.length} 段` : '');
 
   document.querySelectorAll('#results tr').forEach(tr => tr.classList.remove('tr-selected'));
   const row = document.getElementById('row-' + entry.id);
