@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05060b">
 <title>LEO 卫星过境预报</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1124,6 +1125,3476 @@
   }
   @media (prefers-reduced-motion: reduce) { #orbitView * { animation: none !important; } }
 </style>
+<style id="macos-theme">
+/* ==========================================================================
+   ORBIT · macOS Aurora theme
+   在原有功能层之上重绘视觉：Liquid Glass、SF 字体、系统色、弹性动效。
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+  --mac-blue: #0a84ff;
+  --mac-blue-2: #409cff;
+  --mac-teal: #64d2ff;
+  --mac-green: #30d158;
+  --mac-orange: #ff9f0a;
+  --mac-yellow: #ffd60a;
+  --mac-red: #ff453a;
+  --mac-purple: #bf5af2;
+  --mac-pink: #ff375f;
+  --mac-ink: rgba(255, 255, 255, 0.94);
+  --mac-ink-2: rgba(235, 235, 245, 0.66);
+  --mac-ink-3: rgba(235, 235, 245, 0.42);
+  --mac-line: rgba(255, 255, 255, 0.1);
+  --mac-line-strong: rgba(255, 255, 255, 0.18);
+  --mac-radius: 22px;
+  --mac-radius-sm: 13px;
+  --mac-blur: 26px;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Cascadia Mono", monospace;
+
+  /* 兼容旧变量，确保未逐一覆盖的旧规则也落在新主题里 */
+  --bg0: #05060b;
+  --bg1: #0a0c14;
+  --card: rgba(24, 26, 35, 0.6);
+  --text: var(--mac-ink);
+  --muted: var(--mac-ink-2);
+  --border: var(--mac-line);
+  --primary: var(--mac-blue);
+  --primary-2: var(--mac-teal);
+  --primary-dark: #0071e3;
+  --primary-soft: rgba(10, 132, 255, 0.12);
+  --ok: var(--mac-green);
+  --warn: var(--mac-yellow);
+  --error: var(--mac-red);
+  --radius: var(--mac-radius);
+  --shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.95);
+  --font: var(--font-ui);
+  --mono: var(--font-mono);
+}
+
+/* ===== 壁纸 ===== */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--mac-ink);
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  padding: 16px 22px 118px;
+  background:
+    radial-gradient(52% 55% at 16% 4%, rgba(88, 86, 214, 0.4), transparent 70%),
+    radial-gradient(46% 50% at 88% 2%, rgba(30, 144, 255, 0.24), transparent 72%),
+    radial-gradient(42% 48% at 72% 106%, rgba(255, 55, 95, 0.15), transparent 70%),
+    radial-gradient(55% 60% at 4% 96%, rgba(0, 199, 190, 0.17), transparent 72%),
+    linear-gradient(180deg, #05060b 0%, #080a12 45%, #04050a 100%);
+  background-size: 150% 150%, 140% 140%, 140% 140%, 150% 150%, 100% 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  animation: auroraDrift 38s ease-in-out infinite alternate;
+}
+
+/* 顶部环境光（位于画布之后） */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(720px 360px at 50% -10%, rgba(130, 178, 255, 0.22), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 24%);
+}
+
+/* 画布之上的环境色、暗角与玻璃镀膜 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48% 40% at 10% 2%, rgba(100, 96, 235, 0.24), transparent 70%),
+    radial-gradient(42% 36% at 92% 0%, rgba(10, 132, 255, 0.2), transparent 72%),
+    radial-gradient(46% 40% at 80% 102%, rgba(100, 210, 255, 0.14), transparent 70%),
+    radial-gradient(42% 38% at 18% 98%, rgba(255, 55, 95, 0.1), transparent 72%),
+    radial-gradient(ellipse 120% 82% at 50% 4%, transparent 32%, rgba(2, 3, 8, 0.32) 100%),
+    linear-gradient(180deg, rgba(3, 4, 10, 0.2), transparent 26%, rgba(3, 4, 10, 0.38));
+  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, 100% 100%, 100% 100%;
+  animation: ambientDrift 30s ease-in-out infinite alternate;
+}
+
+#spaceBg,
+#spaceFx {
+  z-index: 0;
+  opacity: 0.74;
+  filter: saturate(0.98) brightness(0.84) contrast(1.02);
+  transform: translate3d(var(--bg-px, 0px), var(--bg-py, 0px), 0) scale(1.045);
+  transform-origin: 50% 50%;
+  transition: opacity 0.8s var(--ease-out), filter 0.8s var(--ease-out);
+  will-change: transform;
+}
+
+#spaceFx {
+  opacity: 0.86;
+}
+
+body.wallpaper-paused #spaceBg {
+  opacity: 0.38;
+  filter: saturate(0.68) brightness(0.62) blur(1.5px);
+}
+
+body.wallpaper-paused #spaceFx {
+  opacity: 0.14;
+}
+
+::selection {
+  background: rgba(10, 132, 255, 0.45);
+  color: #fff;
+}
+
+/* ===== 菜单栏 ===== */
+.app-nav {
+  position: sticky;
+  top: 12px;
+  z-index: 80;
+  max-width: 1480px;
+  margin: 0 auto 16px;
+  padding: 9px 12px 9px 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(41, 43, 55, 0.6), rgba(17, 18, 25, 0.64));
+  -webkit-backdrop-filter: blur(30px) saturate(185%);
+  backdrop-filter: blur(30px) saturate(185%);
+  box-shadow:
+    0 20px 46px -22px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: navDrop 0.9s var(--ease-out) backwards;
+}
+
+.mac-traffic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 13px;
+  margin-right: 1px;
+  border-right: 1px solid var(--mac-line);
+  flex: 0 0 auto;
+}
+
+.mac-light {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.24),
+    0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.mac-close { background: #ff5f57; }
+.mac-min { background: #febc2e; }
+.mac-zoom { background: #28c840; }
+
+.mac-light::before {
+  font: 700 9px/1 var(--font-ui);
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.18s var(--ease-std), transform 0.22s var(--spring);
+}
+
+.mac-traffic:hover .mac-light::before {
+  opacity: 1;
+  transform: none;
+}
+
+.mac-close::before { content: "×"; }
+.mac-min::before { content: "−"; }
+.mac-zoom::before { content: "+"; }
+
+.app-identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.app-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(145deg, #3d97ff, #0a63d8 58%, #6e5cf6);
+  box-shadow:
+    0 7px 16px -5px rgba(10, 132, 255, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.app-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.app-wordmark {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--mac-ink);
+  line-height: 1;
+}
+
+.app-subtitle {
+  padding-left: 9px;
+  border-left: 1px solid var(--mac-line);
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  min-width: 0;
+}
+
+.nav-item {
+  appearance: none;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mac-ink-2);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    background 0.22s var(--ease-std),
+    color 0.22s,
+    border-color 0.22s,
+    box-shadow 0.3s,
+    transform 0.25s var(--spring);
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.nav-item.active {
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow:
+    0 7px 18px -7px rgba(10, 132, 255, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.nav-item .caret {
+  margin-left: 6px;
+  font-size: 8.5px;
+  opacity: 0.72;
+  vertical-align: 1px;
+}
+
+.nav-drop {
+  position: relative;
+}
+
+.nav-sub {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 95;
+  display: none;
+  min-width: 224px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(45, 47, 59, 0.82), rgba(22, 24, 32, 0.86));
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
+  backdrop-filter: blur(34px) saturate(190%);
+  box-shadow:
+    0 28px 60px -24px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform-origin: top left;
+}
+
+.nav-sub.open {
+  display: block;
+  animation: menuIn 0.3s var(--spring);
+}
+
+.nav-sub-item {
+  display: block;
+  width: 100%;
+  padding: 9px 11px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--mac-ink-2);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-sub-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.nav-sub-item.active {
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  color: #fff;
+  box-shadow: 0 5px 14px -7px rgba(10, 132, 255, 0.9);
+}
+
+.nav-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.nav-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid rgba(48, 209, 88, 0.2);
+  border-radius: 99px;
+  background: rgba(48, 209, 88, 0.09);
+  color: rgba(170, 255, 196, 0.88);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.nav-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mac-green);
+  box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.12), 0 0 9px rgba(48, 209, 88, 0.85);
+  animation: livePulse 2.6s var(--ease-out) infinite;
+}
+
+.nav-clock {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--mac-ink-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nav-clock-sec {
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.cc-trigger {
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mac-ink-2);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.25s, transform 0.2s var(--spring);
+}
+
+.cc-trigger svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cc-trigger:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.cc-trigger.active {
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  color: #fff;
+  box-shadow: 0 5px 14px -6px rgba(10, 132, 255, 0.85);
+}
+
+/* ===== 控制中心 ===== */
+.control-center {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 12px;
+  z-index: 90;
+  width: 334px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(38, 40, 52, 0.985), rgba(17, 19, 26, 0.992));
+  -webkit-backdrop-filter: blur(38px) saturate(190%);
+  backdrop-filter: blur(38px) saturate(190%);
+  box-shadow:
+    0 34px 80px -26px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.19);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  transform: translateY(-8px) scale(0.94);
+  transform-origin: top right;
+  transition:
+    opacity 0.22s var(--ease-out),
+    transform 0.34s var(--spring),
+    visibility 0.34s;
+}
+
+.control-center.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+
+.cc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 2px 4px 11px;
+}
+
+.cc-title {
+  color: var(--mac-ink);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cc-sub {
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cc-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.cc-tile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--mac-ink);
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.25s var(--spring);
+}
+
+.cc-tile:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  transform: none;
+}
+
+.cc-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+}
+
+.cc-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cc-icon-blue { background: rgba(10, 132, 255, 0.2); color: #6bb4ff; }
+.cc-icon-teal { background: rgba(100, 210, 255, 0.16); color: #7fdcff; }
+.cc-icon-purple { background: rgba(191, 90, 242, 0.18); color: #d79bff; }
+
+.cc-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cc-copy b {
+  color: var(--mac-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.cc-copy small {
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+}
+
+.cc-switch {
+  position: relative;
+  width: 37px;
+  height: 21px;
+  flex: 0 0 auto;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.17);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: background 0.25s var(--ease-std);
+}
+
+.cc-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  transition: transform 0.32s var(--spring);
+}
+
+.cc-tile.is-on .cc-switch {
+  background: linear-gradient(180deg, #4bd76c, #2bbf4f);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.12), 0 0 12px -3px rgba(48, 209, 88, 0.6);
+}
+
+.cc-tile.is-on .cc-switch::after {
+  transform: translateX(16px);
+}
+
+.cc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cc-action {
+  flex: 1;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--mac-ink-2);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.cc-action:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ===== Dock ===== */
+.mac-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 21px;
+  background: linear-gradient(180deg, rgba(48, 50, 62, 0.62), rgba(17, 18, 25, 0.74));
+  -webkit-backdrop-filter: blur(30px) saturate(185%);
+  backdrop-filter: blur(30px) saturate(185%);
+  box-shadow:
+    0 28px 60px -20px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateX(-50%);
+  animation: dockRise 1s 0.4s var(--spring) backwards;
+}
+
+.mac-dock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 56%);
+}
+
+.dock-item {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  transform: scale(var(--dock-scale, 1));
+  transform-origin: 50% 100%;
+  transition: transform 0.13s var(--ease-out), background 0.2s;
+}
+
+.dock-item:hover {
+  background: transparent;
+  box-shadow: none;
+  transform: scale(calc(var(--dock-scale, 1) * 1.06));
+}
+
+.dock-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
+  box-shadow:
+    0 9px 20px -9px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+
+.dock-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.dock-item[data-target="orbit"] .dock-icon {
+  background: linear-gradient(160deg, #3d97ff, #0a63d8);
+  border-color: rgba(140, 200, 255, 0.55);
+}
+
+.dock-item[data-target="antenna"] .dock-icon {
+  background: linear-gradient(160deg, #3ad8c6, #0e8fb8);
+  border-color: rgba(120, 240, 230, 0.48);
+}
+
+.dock-item[data-action="top"] .dock-icon {
+  color: var(--mac-ink-2);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+}
+
+.dock-item:hover .dock-icon {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 14px 26px -9px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+.dock-dot {
+  position: absolute;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s, transform 0.25s var(--spring);
+}
+
+.dock-item.is-active .dock-dot {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.65);
+}
+
+.dock-sep {
+  align-self: center;
+  width: 1px;
+  height: 38px;
+  margin: 0 5px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dock-item::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(30, 32, 41, 0.94);
+  color: var(--mac-ink);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px) scale(0.94);
+  transition: opacity 0.18s, transform 0.24s var(--spring);
+}
+
+.dock-item:hover::after,
+.dock-item:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+.dock-item.is-bouncing .dock-icon {
+  animation: dockBounce 0.55s var(--spring);
+}
+
+/* ===== 通用排版与控件 ===== */
+h1, h2, h3 {
+  font-family: var(--font-ui);
+  color: var(--mac-ink);
+}
+
+h1 {
+  text-shadow: none;
+}
+
+label {
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(9, 11, 17, 0.58);
+  color: var(--mac-ink);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  line-height: 1.45;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.28s var(--ease-out),
+    background 0.2s;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(10, 132, 255, 0.85);
+  background: rgba(7, 9, 15, 0.72);
+  box-shadow:
+    0 0 0 3.5px rgba(10, 132, 255, 0.2),
+    0 0 22px -8px rgba(10, 132, 255, 0.55);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(235, 235, 245, 0.3);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23c8cbd6' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  background-size: 9px 6px;
+  cursor: pointer;
+}
+
+textarea {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition:
+    background 0.24s var(--ease-std),
+    border-color 0.24s,
+    box-shadow 0.28s var(--spring),
+    transform 0.2s var(--spring);
+}
+
+input[type="checkbox"]:checked {
+  border-color: transparent;
+  background-color: var(--mac-blue);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 6.3l2.5 2.5 5.1-5.4' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+  box-shadow:
+    0 5px 12px -5px rgba(10, 132, 255, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: checkPop 0.32s var(--spring);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.35);
+}
+
+input[type="radio"] {
+  accent-color: var(--mac-blue);
+}
+
+::placeholder {
+  opacity: 1;
+}
+
+/* ===== 按钮 ===== */
+button {
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.065));
+  color: var(--mac-ink);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow:
+    0 5px 14px -8px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition:
+    transform 0.18s var(--spring),
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.28s,
+    color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  box-shadow:
+    0 10px 22px -10px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(10, 132, 255, 0.4),
+    0 8px 20px -10px rgba(0, 0, 0, 0.8);
+}
+
+button:disabled {
+  opacity: 0.4;
+  filter: saturate(0.5);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.ghost,
+button.ghost {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--mac-ink-2);
+  box-shadow: none;
+}
+
+.ghost:hover,
+button.ghost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.11);
+  color: #fff;
+  box-shadow: none;
+}
+
+.tiny,
+button.tiny {
+  padding: 6px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+.export-btn {
+  margin-left: auto;
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 600;
+  box-shadow:
+    0 7px 16px -8px rgba(10, 132, 255, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.export-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #4aa2ff, #148eff);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 10px 22px -9px rgba(10, 132, 255, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--mac-ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.file-btn:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.11);
+  color: #fff;
+}
+
+.sat-search {
+  flex: 1;
+  max-width: 300px;
+  min-width: 0;
+  padding: 7px 10px !important;
+  font-size: 11.5px !important;
+}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+  background-clip: content-box;
+}
+
+/* ===== 过境预报：Hero ===== */
+#orbitView {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+#orbitView .mission-shell {
+  padding-bottom: 28px;
+  animation: viewIn 0.75s var(--ease-out) backwards;
+}
+
+#orbitView .mission-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: center;
+  min-height: 188px;
+  margin-bottom: 16px;
+  padding: 30px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 26px;
+  background:
+    radial-gradient(85% 150% at 100% 0%, rgba(95, 210, 255, 0.15), transparent 56%),
+    radial-gradient(70% 130% at 0% 100%, rgba(126, 90, 255, 0.13), transparent 62%),
+    linear-gradient(135deg, rgba(40, 43, 56, 0.64), rgba(15, 17, 25, 0.58));
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  box-shadow:
+    0 34px 80px -34px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: heroIn 1.05s var(--ease-out) backwards;
+}
+
+#orbitView .mission-hero::before {
+  content: "";
+  position: absolute;
+  top: -55%;
+  right: -12%;
+  z-index: -1;
+  width: 64%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(100, 210, 255, 0.22), rgba(94, 92, 230, 0.12) 42%, transparent 68%);
+  filter: blur(26px);
+  animation: heroGlow 13s ease-in-out infinite alternate;
+}
+
+#orbitView .mission-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(340px circle at var(--mx, 84%) var(--my, 14%), rgba(255, 255, 255, 0.09), transparent 62%);
+  opacity: 0.85;
+}
+
+#orbitView .mission-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  min-width: 0;
+}
+
+#orbitView .mission-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 11px;
+  color: #8fc7ff;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.18em;
+  animation: fadeUp 0.85s 0.06s var(--ease-out) backwards;
+}
+
+#orbitView .mission-kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #64d2ff, #0a84ff);
+  box-shadow: 0 0 10px rgba(100, 210, 255, 0.8);
+}
+
+#orbitView .mission-hero h1 {
+  margin: 0;
+  color: #fff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+  text-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
+  animation: heroTitleIn 0.95s 0.1s var(--ease-out) backwards;
+}
+
+#orbitView .mission-hero .subtitle {
+  max-width: 650px;
+  margin: 12px 0 0;
+  color: var(--mac-ink-2);
+  font-size: 13px;
+  line-height: 1.72;
+  animation: fadeUp 0.9s 0.18s var(--ease-out) backwards;
+}
+
+#orbitView .hero-meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 292px;
+  padding: 15px 17px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.035));
+  box-shadow:
+    0 18px 40px -24px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  animation: fadeUp 0.95s 0.24s var(--ease-out) backwards;
+}
+
+#orbitView .orbit-scope {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(140, 220, 255, 0.56);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(10, 132, 255, 0.28), transparent 64%),
+    repeating-radial-gradient(circle, transparent 0 15px, rgba(150, 220, 255, 0.18) 16px 17px);
+  box-shadow:
+    0 0 36px rgba(10, 132, 255, 0.34),
+    inset 0 0 26px rgba(10, 132, 255, 0.24);
+}
+
+#orbitView .orbit-scope::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(130, 235, 255, 0.9), transparent 24%, transparent 52%, rgba(110, 108, 255, 0.34) 78%, transparent);
+  -webkit-mask: radial-gradient(circle, transparent 55%, #000 56%);
+  mask: radial-gradient(circle, transparent 55%, #000 56%);
+  animation: scopeSpin 7.5s linear infinite;
+}
+
+#orbitView .orbit-scope::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7dffe9;
+  box-shadow: 0 0 12px 3px rgba(83, 248, 214, 0.55);
+  animation: scopeBlip 3.2s ease-in-out infinite;
+}
+
+#orbitView .hero-meta-copy {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+#orbitView .live-signal {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(170, 255, 196, 0.88);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+}
+
+#orbitView .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mac-green);
+  box-shadow:
+    0 0 0 3px rgba(48, 209, 88, 0.12),
+    0 0 10px rgba(48, 209, 88, 0.8);
+  animation: livePulse 2.6s var(--ease-out) infinite;
+}
+
+#orbitView .hero-clock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.07em;
+}
+
+#orbitView .hero-clock-time {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+#orbitView .hero-status {
+  max-width: 215px;
+  color: var(--mac-ink-3);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ===== 过境预报：概览卡片 ===== */
+#orbitView .mission-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+#orbitView .overview-card {
+  --tone: #0a84ff;
+  position: relative;
+  min-height: 128px;
+  padding: 17px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background:
+    radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(160deg, rgba(41, 44, 57, 0.62), rgba(16, 18, 26, 0.54));
+  -webkit-backdrop-filter: blur(26px) saturate(175%);
+  backdrop-filter: blur(26px) saturate(175%);
+  box-shadow:
+    0 20px 46px -30px rgba(0, 0, 0, 0.94),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  transition:
+    transform 0.45s var(--spring),
+    border-color 0.35s,
+    box-shadow 0.45s;
+}
+
+#orbitView .overview-card[data-tone="purple"] { --tone: #bf5af2; }
+#orbitView .overview-card[data-tone="teal"] { --tone: #64d2ff; }
+#orbitView .overview-card[data-tone="orange"] { --tone: #ff9f0a; }
+
+#orbitView .overview-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.19);
+  box-shadow:
+    0 30px 62px -32px rgba(0, 0, 0, 0.98),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+#orbitView .overview-card::after {
+  content: "";
+  position: absolute;
+  top: -52px;
+  right: -46px;
+  width: 130px;
+  height: 130px;
+  border: none;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tone) 17%, transparent), transparent 68%);
+  box-shadow: none;
+}
+
+#orbitView .overview-card.is-accent {
+  border-color: rgba(100, 210, 255, 0.24);
+  background:
+    radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.08), transparent 62%),
+    linear-gradient(150deg, rgba(16, 78, 94, 0.62), rgba(12, 26, 42, 0.6));
+}
+
+#orbitView .widget-icon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--tone) 15%, transparent);
+  border-color: color-mix(in srgb, var(--tone) 27%, transparent);
+  color: var(--tone);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: transform 0.4s var(--spring), box-shadow 0.4s;
+}
+
+#orbitView .widget-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+#orbitView .overview-card:hover .widget-icon {
+  transform: scale(1.07) rotate(-3deg);
+  box-shadow:
+    0 8px 18px -10px color-mix(in srgb, var(--tone) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+#orbitView .overview-label {
+  position: relative;
+  z-index: 1;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.11em;
+}
+
+#orbitView .overview-value {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 13px;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 27px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+#orbitView .overview-detail {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 8px;
+  color: var(--mac-ink-3);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#orbitView .overview-card.is-accent .overview-value {
+  color: #a7ffea;
+  text-shadow: 0 0 22px rgba(80, 239, 205, 0.25);
+}
+
+/* ===== 过境预报：工作区与面板 ===== */
+#orbitView .orbit-workbench {
+  display: grid;
+  grid-template-columns: minmax(330px, 0.86fr) minmax(0, 1.74fr);
+  gap: 16px;
+  align-items: start;
+}
+
+#orbitView .settings-column,
+#orbitView .analysis-column {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+#orbitView .panel,
+.panel {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: var(--mac-radius);
+  background: linear-gradient(180deg, rgba(39, 42, 54, 0.57), rgba(16, 18, 26, 0.53));
+  -webkit-backdrop-filter: blur(28px) saturate(175%);
+  backdrop-filter: blur(28px) saturate(175%);
+  box-shadow:
+    0 28px 66px -38px rgba(0, 0, 0, 0.96),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  transition: border-color 0.4s, box-shadow 0.4s, background 0.4s;
+  animation: none;
+}
+
+#orbitView .panel {
+  margin: 0;
+}
+
+#orbitView .panel:hover,
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.17);
+  box-shadow:
+    0 34px 76px -38px rgba(0, 0, 0, 0.98),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+#orbitView .panel h2,
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 15px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--mac-line);
+  color: var(--mac-ink);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+}
+
+#orbitView .panel h2::before,
+.panel h2::before {
+  content: "";
+  width: 3px;
+  height: 16px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #64d2ff, #0a84ff);
+  box-shadow: 0 0 10px rgba(100, 210, 255, 0.55);
+}
+
+#orbitView .settings-column .panel h2 {
+  font-size: 12.5px;
+}
+
+#orbitView .panel h2 .badge,
+.panel h2 .badge {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--mac-ink-2);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge {
+  border-radius: 99px;
+}
+
+/* 行与状态 */
+.row {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.status {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 2px solid rgba(100, 210, 255, 0.65);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+#orbitView .status {
+  margin: 11px 0 0;
+  border-radius: 8px;
+}
+
+#orbitView .status.loading { border-left-color: var(--mac-yellow); color: #ffe7a0; }
+#orbitView .status.success { border-left-color: var(--mac-green); color: #a9f7c8; }
+#orbitView .status.error { border-left-color: var(--mac-red); color: #ffb4ae; }
+
+.hint {
+  color: var(--mac-ink-3);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.empty {
+  padding: 32px 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--mac-ink-3);
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+#orbitView .empty {
+  padding: 32px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.022);
+  color: var(--mac-ink-3);
+}
+
+/* 卫星 / 站址列表 */
+.sat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 0.22s,
+    background 0.22s,
+    box-shadow 0.28s,
+    transform 0.3s var(--spring);
+  animation: itemIn 0.44s var(--ease-out) backwards;
+}
+
+.sat-item:nth-child(2) { animation-delay: 0.025s; }
+.sat-item:nth-child(3) { animation-delay: 0.05s; }
+.sat-item:nth-child(4) { animation-delay: 0.075s; }
+.sat-item:nth-child(5) { animation-delay: 0.1s; }
+.sat-item:nth-child(6) { animation-delay: 0.125s; }
+.sat-item:nth-child(7) { animation-delay: 0.15s; }
+.sat-item:nth-child(8) { animation-delay: 0.175s; }
+
+.sat-item:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateX(2px);
+}
+
+.sat-item.clickable {
+  cursor: pointer;
+}
+
+#orbitView .sat-item {
+  padding: 9px 10px;
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#orbitView .sat-item.selected {
+  border-color: rgba(100, 210, 255, 0.32);
+  background:
+    linear-gradient(90deg, rgba(10, 132, 255, 0.16), rgba(10, 132, 255, 0.04)),
+    rgba(255, 255, 255, 0.045);
+  box-shadow:
+    inset 2px 0 0 #64d2ff,
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#orbitView .sat-item input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+}
+
+.sat-item .sat-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  color: var(--mac-ink);
+  font-size: 12.5px;
+}
+
+.sat-item .sat-name .name-text {
+  cursor: text;
+}
+
+.sat-item .sat-orig {
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+}
+
+.sat-item .sat-id {
+  flex: 0 0 auto;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.sat-item .sat-tle {
+  flex: 0 0 auto;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.sat-item .edit-btn,
+.sat-item .del-btn {
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-size: 10px;
+  line-height: 1.25;
+  box-shadow: none;
+}
+
+.sat-item .edit-btn {
+  border-color: rgba(100, 210, 255, 0.24);
+  background: rgba(100, 210, 255, 0.1);
+  color: #a8e7ff;
+}
+
+.sat-item .edit-btn:hover {
+  border-color: rgba(100, 210, 255, 0.4);
+  background: rgba(100, 210, 255, 0.2);
+  color: #fff;
+}
+
+.sat-item .del-btn {
+  border-color: rgba(255, 69, 58, 0.26);
+  background: rgba(255, 69, 58, 0.1);
+  color: #ffb2ac;
+}
+
+.sat-item .del-btn:hover {
+  border-color: rgba(255, 69, 58, 0.46);
+  background: rgba(255, 69, 58, 0.22);
+  color: #fff;
+}
+
+#orbitView .sat-group {
+  display: inline-flex;
+  align-items: center;
+  max-width: 128px;
+  overflow: hidden;
+  padding: 2px 6px;
+  border: 1px solid rgba(100, 210, 255, 0.2);
+  border-radius: 99px;
+  color: #9ee9f7;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#orbitView .sat-group.is-empty {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--mac-ink-3);
+}
+
+.alias-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid rgba(10, 132, 255, 0.55);
+  border-radius: 7px;
+  background: rgba(7, 9, 15, 0.8);
+  color: var(--mac-ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  outline: none;
+}
+
+.tle-view {
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  background: rgba(6, 8, 14, 0.55);
+  animation: itemIn 0.4s var(--ease-out) backwards;
+}
+
+.tle-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.tle-line {
+  color: rgba(160, 220, 255, 0.86);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+details summary {
+  padding: 4px 0;
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.18s;
+}
+
+details summary:hover {
+  color: #fff;
+}
+
+details[open] summary {
+  margin-bottom: 10px;
+  color: var(--mac-ink);
+}
+
+/* 工具栏与分组 */
+#orbitView .sat-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#orbitView .sat-toolbar .group-filter {
+  width: auto;
+  min-width: 124px;
+  max-width: 184px;
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+#orbitView .tle-update-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 9px 0 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+#orbitView .tle-update-label {
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+#orbitView .tle-update-status {
+  margin-left: auto;
+  color: var(--mac-ink-3);
+  font-size: 10px;
+}
+
+#orbitView .tle-update-status.loading { color: #ffe7a0; }
+#orbitView .tle-update-status.success { color: #a9f7c8; }
+#orbitView .tle-update-status.error { color: #ffb4ae; }
+
+#orbitView .group-editor {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) auto auto;
+  align-items: end;
+  gap: 8px;
+  margin-top: 11px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+#orbitView .group-editor label {
+  margin: 0 0 4px;
+}
+
+#orbitView .group-editor input {
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+.add-sat-details summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--mac-ink-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.add-sat-details summary:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.11);
+  color: #fff;
+}
+
+.add-sat-details[open] {
+  flex-basis: 100%;
+}
+
+/* 预报结果 */
+#orbitView .results-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 15px;
+  padding: 14px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgba(10, 132, 255, 0.1), rgba(255, 255, 255, 0.02));
+}
+
+#orbitView .results-summary-main {
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+#orbitView .results-summary-main strong {
+  color: var(--mac-ink);
+  font-weight: 600;
+}
+
+#orbitView .results-total {
+  color: #a7ffea;
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 18px rgba(80, 239, 205, 0.24);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#orbitView .results-total small {
+  display: block;
+  margin-top: 5px;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+#orbitView .opportunity-radar {
+  margin: 0 0 15px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(37, 189, 211, 0.1), transparent 32%),
+    rgba(255, 255, 255, 0.025);
+}
+
+#orbitView .opportunity-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 11px;
+  color: var(--mac-ink-2);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+#orbitView .opportunity-head span {
+  color: var(--mac-ink-3);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+#orbitView .opportunity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+#orbitView .opportunity-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--mac-ink);
+  text-align: left;
+  box-shadow: none;
+  transition:
+    transform 0.35s var(--spring),
+    border-color 0.25s,
+    background 0.25s,
+    box-shadow 0.3s;
+  animation: itemIn 0.5s var(--ease-out) backwards;
+}
+
+#orbitView .opportunity-card:nth-child(2) { animation-delay: 0.04s; }
+#orbitView .opportunity-card:nth-child(3) { animation-delay: 0.08s; }
+#orbitView .opportunity-card:nth-child(4) { animation-delay: 0.12s; }
+
+#orbitView .opportunity-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(100, 210, 255, 0.32);
+  background: rgba(255, 255, 255, 0.075);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.9);
+}
+
+#orbitView .opportunity-time {
+  color: #8fd8ff;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+#orbitView .opportunity-name {
+  overflow: hidden;
+  color: var(--mac-ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#orbitView .opportunity-station {
+  overflow: hidden;
+  color: var(--mac-ink-3);
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#orbitView .elevation-meter {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+#orbitView .elevation-meter > span {
+  display: block;
+  width: var(--elevation);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0a84ff, #64ffd9);
+  box-shadow: 0 0 10px rgba(89, 239, 196, 0.5);
+  transition: width 0.6s var(--ease-out);
+}
+
+/* 结果表格 */
+#orbitView .table-shell {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+#orbitView .table-shell table {
+  min-width: 760px;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+th {
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#orbitView .table-shell th {
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--mac-ink-3);
+}
+
+#orbitView .table-shell td {
+  border-color: rgba(255, 255, 255, 0.055);
+}
+
+tbody tr {
+  transition: background 0.22s;
+}
+
+#orbitView .pass-row {
+  cursor: pointer;
+  animation: rowIn 0.5s var(--ease-out) backwards;
+}
+
+#orbitView .pass-row:nth-child(2) { animation-delay: 0.025s; }
+#orbitView .pass-row:nth-child(3) { animation-delay: 0.05s; }
+#orbitView .pass-row:nth-child(4) { animation-delay: 0.075s; }
+#orbitView .pass-row:nth-child(5) { animation-delay: 0.1s; }
+#orbitView .pass-row:nth-child(6) { animation-delay: 0.125s; }
+#orbitView .pass-row:nth-child(7) { animation-delay: 0.15s; }
+#orbitView .pass-row:nth-child(8) { animation-delay: 0.175s; }
+#orbitView .pass-row:nth-child(n + 9) { animation-delay: 0.2s; }
+
+#orbitView .pass-row:hover td {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#orbitView .pass-row:hover td:first-child {
+  box-shadow: inset 2px 0 0 rgba(100, 210, 255, 0.85);
+}
+
+#orbitView .tr-selected td {
+  background: rgba(10, 132, 255, 0.14) !important;
+}
+
+#orbitView .tr-selected td:first-child {
+  box-shadow: inset 2px 0 0 #0a84ff;
+}
+
+.pass-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mac-ink-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.time-cell {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-label {
+  margin-right: 6px;
+  color: #8fd8ff;
+  font-size: 9.5px;
+}
+
+.saved-flash {
+  color: var(--mac-green) !important;
+}
+
+/* 可视化 */
+#orbitView #visPanel {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 86% 4%, rgba(44, 180, 215, 0.12), transparent 28%),
+    linear-gradient(160deg, rgba(39, 42, 55, 0.6), rgba(14, 16, 24, 0.56));
+}
+
+#orbitView .vis-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+#orbitView .vis-cap {
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 2px solid #64d2ff;
+  border-radius: 0 9px 9px 0;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+#orbitView .vis-note {
+  margin-top: 8px;
+  color: var(--mac-ink-3);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+#orbitView .vis-note b {
+  color: #8fd8ff;
+  font-weight: 600;
+}
+
+#orbitView #skyCanvas,
+#orbitView #elCanvas {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+}
+
+#orbitView #visEmpty {
+  padding: 0;
+}
+
+#orbitView #btnPredict {
+  width: 100%;
+  min-height: 44px;
+  border-color: rgba(255, 255, 255, 0.24);
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  color: #fff;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 10px 24px -12px rgba(10, 132, 255, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+#orbitView #btnPredict:hover {
+  background: linear-gradient(180deg, #4aa2ff, #148eff);
+  box-shadow:
+    0 16px 32px -14px rgba(10, 132, 255, 1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+#orbitView #btnPlay {
+  border-color: rgba(100, 210, 255, 0.3);
+  background: rgba(100, 210, 255, 0.1);
+  color: #a8e7ff;
+}
+
+/* ===== 天线工具视图 ===== */
+#antView .container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 0 40px;
+  position: relative;
+  z-index: 1;
+  animation: viewIn 0.75s var(--ease-out) backwards;
+}
+
+#antView header.app-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 24px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  background:
+    radial-gradient(80% 160% at 100% 0%, rgba(100, 210, 255, 0.14), transparent 58%),
+    linear-gradient(135deg, rgba(40, 43, 56, 0.64), rgba(15, 17, 25, 0.58));
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  box-shadow:
+    0 34px 80px -40px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+#antView header.app-header::after {
+  content: "";
+  position: absolute;
+  top: -90%;
+  right: -6%;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.16), transparent 66%);
+  filter: blur(8px);
+}
+
+#antView header.app-header::before {
+  content: "ANTENNA · PERFORMANCE";
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  color: rgba(255, 255, 255, 0.13);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  pointer-events: none;
+}
+
+#antView .brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+#antView .radar {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(100, 210, 255, 0.42);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 56%, rgba(100, 210, 255, 0.32) 57%, transparent 59%),
+    radial-gradient(circle, transparent 76%, rgba(100, 210, 255, 0.22) 77%, transparent 79%),
+    radial-gradient(circle, rgba(10, 132, 255, 0.2), transparent 68%);
+  box-shadow:
+    0 0 24px rgba(10, 132, 255, 0.26),
+    inset 0 0 16px rgba(10, 132, 255, 0.18);
+}
+
+#antView .radar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(100, 210, 255, 0.72), transparent 68deg);
+  animation: radarSpin 4s linear infinite;
+}
+
+#antView .radar::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64d2ff;
+  box-shadow: 0 0 12px #64d2ff;
+  transform: translate(-50%, -50%);
+}
+
+#antView header.app-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #fff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+#antView header.app-header .subtitle {
+  margin: 5px 0 0;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+}
+
+#antView .sys-sep {
+  margin: 0 7px;
+  color: var(--mac-teal);
+  opacity: 0.5;
+}
+
+#antView .btn-ghost {
+  position: relative;
+  z-index: 1;
+  border-color: rgba(100, 210, 255, 0.28);
+  background: rgba(100, 210, 255, 0.1);
+  color: #a8e7ff;
+}
+
+#antView .btn-ghost:hover {
+  border-color: rgba(100, 210, 255, 0.45);
+  background: rgba(100, 210, 255, 0.2);
+  color: #fff;
+}
+
+/* 分段式标签栏 */
+#antView .tabs,
+.segmented {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 2px;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  scrollbar-width: none;
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+}
+
+#antView .tabs::-webkit-scrollbar,
+.segmented::-webkit-scrollbar {
+  display: none;
+}
+
+.seg-thumb {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: calc(100% - 8px);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  box-shadow:
+    0 6px 16px -8px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  transition:
+    transform 0.42s var(--spring),
+    width 0.42s var(--spring);
+  z-index: 0;
+}
+
+#antView .tab-btn,
+.seg-btn {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mac-ink-2);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: none;
+  cursor: pointer;
+  transition: color 0.22s, background 0.22s;
+}
+
+#antView .tab-btn:hover,
+.seg-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+#antView .tab-btn.active,
+.seg-btn.active {
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+#antView .tabs:not(.has-thumb) .tab-btn.active,
+.segmented:not(.has-thumb) .seg-btn.active {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+#antView .segmented {
+  width: auto;
+  margin-bottom: 14px;
+}
+
+#antView .tab-panel {
+  display: none;
+}
+
+#antView .tab-panel.active {
+  display: block;
+  animation: panelIn 0.5s var(--ease-out);
+}
+
+/* 卡片 */
+#antView .card {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: var(--mac-radius);
+  background: linear-gradient(180deg, rgba(39, 42, 54, 0.57), rgba(16, 18, 26, 0.53));
+  -webkit-backdrop-filter: blur(28px) saturate(175%);
+  backdrop-filter: blur(28px) saturate(175%);
+  box-shadow:
+    0 28px 66px -38px rgba(0, 0, 0, 0.96),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+#antView .card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 5px;
+  color: var(--mac-ink);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+#antView .card .card-desc {
+  margin: 0 0 16px;
+  color: var(--mac-ink-2);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+#antView .formula-box {
+  margin-bottom: 16px;
+  padding: 11px 14px;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(6, 8, 14, 0.46);
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: nowrap;
+}
+
+#antView .formula-box code {
+  color: #9fdcff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+#antView .section-label {
+  margin: 6px 0 10px;
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+#antView .input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+#antView .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#antView .field label {
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+#antView .field label .unit {
+  margin-left: 3px;
+  color: var(--mac-ink-3);
+  font-weight: 400;
+}
+
+#antView .input-row {
+  display: flex;
+  align-items: stretch;
+}
+
+#antView .input-row input {
+  flex: 1;
+  min-width: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#antView .input-row select {
+  width: auto;
+  flex: 0 0 auto;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  background-color: rgba(18, 21, 30, 0.92);
+  color: var(--mac-ink);
+  font-size: 11.5px;
+  padding: 8px 24px 8px 8px;
+}
+
+#antView .radio-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+}
+
+#antView .radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--mac-ink-2);
+  cursor: pointer;
+}
+
+#antView input[type="radio"],
+#antView input[type="checkbox"] {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+#antView input[type="radio"]:focus-visible,
+#antView input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgba(10, 132, 255, 0.7);
+  outline-offset: 2px;
+}
+
+#antView .hint {
+  color: var(--mac-ink-3);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+#antView .actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+/* 天线按钮 */
+#antView .btn {
+  padding: 9px 17px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.065));
+  color: var(--mac-ink);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow:
+    0 5px 14px -8px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition:
+    transform 0.18s var(--spring),
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.28s,
+    color 0.2s;
+}
+
+#antView .btn:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  color: #fff;
+  box-shadow:
+    0 10px 22px -10px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+#antView .btn-primary {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: linear-gradient(180deg, #3b96ff, #0a7cff);
+  color: #fff;
+  text-shadow: none;
+  box-shadow:
+    0 9px 22px -11px rgba(10, 132, 255, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+#antView .btn-primary:hover {
+  background: linear-gradient(180deg, #4aa2ff, #148eff);
+  color: #fff;
+  box-shadow:
+    0 14px 30px -12px rgba(10, 132, 255, 1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+#antView .btn-sm {
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+#antView .btn-link {
+  border-color: transparent;
+  background: transparent;
+  color: #8fd8ff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  box-shadow: none;
+}
+
+#antView .btn-link:hover {
+  background: rgba(100, 210, 255, 0.08);
+  color: #c3ecff;
+  box-shadow: none;
+}
+
+#antView .btn:disabled {
+  opacity: 0.4;
+  filter: saturate(0.5);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 错误 / 警告 */
+.error-box,
+.warn-box {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.error-box {
+  border: 1px solid rgba(255, 69, 58, 0.38);
+  background: rgba(255, 69, 58, 0.1);
+  color: #ffb4ae;
+}
+
+.warn-box {
+  border: 1px solid rgba(255, 214, 10, 0.3);
+  background: rgba(255, 214, 10, 0.08);
+  color: #ffe7a0;
+}
+
+/* 结果卡片 */
+#antView .result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+#antView .result-box {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+  transition: border-color 0.3s, transform 0.4s var(--spring), background 0.3s;
+}
+
+#antView .result-box:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+#antView .result-box .r-label {
+  margin-bottom: 5px;
+  color: var(--mac-ink-3);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#antView .result-box .r-value {
+  color: var(--mac-ink);
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+#antView .result-box .r-unit {
+  margin-left: 3px;
+  color: var(--mac-ink-3);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+#antView .result-box .r-note {
+  margin-top: 5px;
+  color: var(--mac-ink-3);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#antView .result-box.primary {
+  border-color: rgba(100, 210, 255, 0.3);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(100, 210, 255, 0.15), transparent 55%),
+    linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(100, 210, 255, 0.06));
+  box-shadow:
+    0 20px 46px -32px rgba(10, 132, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+#antView .result-box.primary .r-value {
+  color: #b9e6ff;
+  text-shadow: 0 0 22px rgba(100, 210, 255, 0.3);
+}
+
+#antView .source-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 9px 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--mac-ink-3);
+  font-size: 11px;
+}
+
+#antView .source-row strong {
+  color: var(--mac-ink);
+}
+
+#antView .save-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+#antView .save-row input {
+  flex: 1;
+  min-width: 240px;
+}
+
+/* 记录 */
+#antView .record-item {
+  margin-bottom: 10px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  animation: itemIn 0.45s var(--ease-out) backwards;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+#antView .record-item:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#antView .record-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#antView .record-name {
+  color: var(--mac-ink);
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+#antView .record-meta {
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+#antView .record-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+  color: var(--mac-ink-2);
+  font-size: 11px;
+}
+
+#antView .record-values span b {
+  color: #8fd8ff;
+  font-weight: 600;
+}
+
+#antView .record-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#antView .empty-hint {
+  padding: 26px 10px;
+  color: var(--mac-ink-3);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+/* 表格 */
+#antView .table-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+#antView .data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+#antView .data-table th,
+#antView .data-table td {
+  padding: 6px 9px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: right;
+  white-space: nowrap;
+}
+
+#antView .data-table th {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+#antView .data-table td:first-child {
+  text-align: center;
+}
+
+#antView .data-table .total-row td {
+  background: rgba(10, 132, 255, 0.09);
+  color: #a8e7ff;
+  font-weight: 600;
+}
+
+#antView .point-entry {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+#antView .point-entry .pe-label {
+  display: inline-block;
+  margin: 0;
+  color: var(--mac-ink-2);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+#antView .point-entry .pe-idx {
+  color: var(--mac-blue-2);
+  font-weight: 700;
+}
+
+#antView .point-entry input {
+  width: 168px;
+}
+
+#antView .point-count {
+  margin: 10px 0 6px;
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+}
+
+#antView .point-input-wrap {
+  max-height: 258px;
+  overflow: auto;
+}
+
+#antView .point-input-wrap td:last-child {
+  width: 76px;
+  text-align: center;
+}
+
+/* 操作指南 */
+#antView .checklist ol,
+#antView .checklist ul {
+  margin: 8px 0 8px 20px;
+  padding: 0;
+}
+
+#antView .checklist li {
+  margin-bottom: 6px;
+  color: var(--mac-ink-2);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+#antView .checklist .sub-title {
+  margin: 22px 0 8px;
+  color: #8fd8ff;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+#antView .checklist .sub-title:first-child {
+  margin-top: 0;
+}
+
+#antView .checklist table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+#antView .checklist th,
+#antView .checklist td {
+  padding: 9px 11px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+#antView .checklist th {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--mac-ink-3);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#antView .checklist tr:last-child td {
+  border-bottom: none;
+}
+
+#antView .checklist code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(100, 210, 255, 0.1);
+  color: #9fdcff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+#antView footer {
+  margin-top: 26px;
+  color: var(--mac-ink-3);
+  font-size: 10.5px;
+  text-align: center;
+}
+
+/* ===== Toast（macOS 通知） ===== */
+#toast {
+  position: fixed;
+  top: 88px;
+  right: 26px;
+  left: auto;
+  bottom: auto;
+  z-index: 999;
+  max-width: 380px;
+  padding: 12px 18px 12px 46px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(45, 47, 59, 0.9), rgba(22, 24, 32, 0.92));
+  -webkit-backdrop-filter: blur(32px) saturate(185%);
+  backdrop-filter: blur(32px) saturate(185%);
+  color: var(--mac-ink);
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow:
+    0 28px 60px -24px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(24px) scale(0.96);
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.45s var(--spring);
+}
+
+#toast::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  width: 23px;
+  height: 23px;
+  margin-top: -11.5px;
+  border-radius: 7px;
+  background-color: #0a84ff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 6.3l2.5 2.5 5.1-5.4' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px;
+  box-shadow:
+    0 5px 12px -5px rgba(10, 132, 255, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+#toast.show {
+  opacity: 1;
+  transform: none;
+}
+
+#toast.is-warn::before {
+  background-color: #ff9f0a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M6 2.1v4.4' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='9.4' r='1.05' fill='%23fff'/%3E%3C/svg%3E");
+  box-shadow:
+    0 5px 12px -5px rgba(255, 159, 10, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* ===== 入场与滚动揭示 ===== */
+.mac-reveal {
+  opacity: 0;
+}
+
+.mac-reveal.is-revealed {
+  opacity: 1;
+  animation: revealIn 0.85s var(--spring) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.value-flash {
+  animation: valueFlash 0.6s var(--ease-out);
+}
+
+/* ===== 动效关键帧 ===== */
+@keyframes auroraDrift {
+  0% {
+    background-position: 12% 0%, 88% 0%, 72% 100%, 8% 92%, 0 0;
+  }
+  50% {
+    background-position: 24% 12%, 78% 8%, 60% 88%, 18% 80%, 0 0;
+  }
+  100% {
+    background-position: 6% 18%, 94% 14%, 82% 80%, 2% 70%, 0 0;
+  }
+}
+
+@keyframes ambientDrift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 0%, 0 0;
+    opacity: 0.86;
+  }
+  50% {
+    background-position: 12% 8%, 88% 10%, 86% 88%, 12% 90%, 50% 0%, 0 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: 4% 14%, 96% 18%, 94% 82%, 6% 84%, 50% 0%, 0 0;
+    opacity: 0.92;
+  }
+}
+
+@keyframes navDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+    filter: blur(8px);
+  }
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.94);
+  }
+}
+
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+    filter: blur(10px);
+  }
+}
+
+@keyframes heroTitleIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.12), 0 0 10px rgba(48, 209, 88, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(48, 209, 88, 0.04), 0 0 16px rgba(48, 209, 88, 1);
+  }
+}
+
+@keyframes scopeSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes scopeBlip {
+  0%, 100% { opacity: 0.45; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes heroGlow {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+  to { transform: translate3d(-3%, 4%, 0) scale(1.12); opacity: 1; }
+}
+
+@keyframes radarSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dockRise {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px) scale(0.9);
+  }
+}
+
+@keyframes dockBounce {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-11px) scale(1.06); }
+  65% { transform: translateY(2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.994);
+    filter: blur(7px);
+  }
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.996);
+    filter: blur(5px);
+  }
+}
+
+@keyframes revealIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.992);
+    filter: blur(7px);
+  }
+}
+
+@keyframes itemIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0.8); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes valueFlash {
+  0% { text-shadow: 0 0 0 rgba(100, 210, 255, 0); }
+  30% {
+    color: #b9e6ff;
+    text-shadow: 0 0 18px rgba(100, 210, 255, 0.75);
+  }
+  100% { text-shadow: 0 0 0 rgba(100, 210, 255, 0); }
+}
+
+/* ===== 状态开关 ===== */
+body.glass-off .app-nav,
+body.glass-off .control-center,
+body.glass-off .mac-dock,
+body.glass-off .panel,
+body.glass-off .card,
+body.glass-off #orbitView .mission-hero,
+body.glass-off .hero-meta,
+body.glass-off #orbitView .overview-card,
+body.glass-off #antView header.app-header,
+body.glass-off #orbitView .opportunity-radar,
+body.glass-off #toast {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-color: rgba(19, 21, 29, 0.96) !important;
+  background-image: none !important;
+}
+
+body.glass-off #orbitView .mission-hero,
+body.glass-off #antView header.app-header {
+  background-image: linear-gradient(135deg, rgba(31, 34, 46, 0.99), rgba(15, 17, 25, 0.99)) !important;
+}
+
+body.glass-off #orbitView .overview-card {
+  background-image: linear-gradient(160deg, rgba(35, 38, 51, 0.98), rgba(18, 20, 28, 0.98)) !important;
+}
+
+body.glass-off .control-center {
+  background-image: linear-gradient(180deg, rgba(39, 41, 53, 0.99), rgba(17, 19, 26, 0.99)) !important;
+}
+
+body.glass-off #spaceBg,
+body.glass-off #spaceFx {
+  opacity: 0.5;
+}
+
+body.motion-off,
+body.motion-off *,
+body.motion-off *::before,
+body.motion-off *::after,
+body.motion-off::before,
+body.motion-off::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+body.motion-off .mac-reveal {
+  opacity: 1;
+}
+
+body.motion-off #orbitView .mission-hero::before {
+  animation: none;
+}
+
+/* 减少动态效果时保留一张静态壁纸，而不是把背景压成近乎全黑 */
+body.motion-off.wallpaper-paused #spaceBg {
+  opacity: 0.66;
+  filter: saturate(0.86) brightness(0.78) blur(0.5px);
+}
+
+body.motion-off.wallpaper-paused #spaceFx {
+  opacity: 0.28;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 1180px) {
+  .app-subtitle { display: none; }
+  #orbitView .orbit-workbench { grid-template-columns: minmax(310px, 0.9fr) minmax(0, 1.6fr); }
+  #orbitView .mission-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #orbitView .opportunity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1080px) {
+  #orbitView .orbit-workbench { grid-template-columns: 1fr; }
+  #orbitView .settings-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #orbitView .settings-column .panel:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 980px) {
+  body { padding: 12px 16px 108px; }
+  .app-nav { top: 10px; gap: 9px; padding: 8px 10px 8px 12px; }
+  .nav-live-text { display: none; }
+  .nav-live { padding: 6px; }
+  #orbitView .mission-hero { gap: 20px; }
+  #orbitView .hero-meta { min-width: 250px; }
+  #orbitView .vis-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  body { padding: 10px 10px 90px; }
+  .app-nav {
+    top: 8px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    margin-bottom: 12px;
+    padding: 9px 10px;
+    border-radius: 16px;
+  }
+  .mac-traffic { gap: 7px; padding-right: 10px; }
+  .app-icon { width: 27px; height: 27px; border-radius: 8px; }
+  .app-icon svg { width: 17px; height: 17px; }
+  .app-wordmark { font-size: 12px; }
+  .nav-menu {
+    order: 6;
+    width: 100%;
+    margin: 0;
+    padding-top: 2px;
+    border-top: 1px solid var(--mac-line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-menu::-webkit-scrollbar { display: none; }
+  .nav-status { gap: 8px; }
+  .nav-clock { font-size: 11px; }
+  .nav-clock-sec { display: none; }
+  .control-center {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    bottom: auto;
+    width: auto;
+    max-height: calc(100vh - 130px);
+    background: linear-gradient(180deg, #23252e, #14161d);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top center;
+  }
+  .control-center.open { transform: none; }
+  .mac-dock { display: none; }
+  #orbitView { max-width: none; }
+  #orbitView .mission-hero {
+    grid-template-columns: 1fr;
+    padding: 22px;
+    min-height: 0;
+    border-radius: 22px;
+  }
+  #orbitView .mission-hero h1 { font-size: 1.65rem; }
+  #orbitView .hero-meta {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 14px;
+    border-radius: 17px;
+  }
+  #orbitView .orbit-scope { width: 66px; height: 66px; }
+  #orbitView .hero-status { max-width: none; }
+  #orbitView .mission-overview { gap: 9px; }
+  #orbitView .overview-card {
+    min-height: 112px;
+    padding: 14px;
+    border-radius: 17px;
+  }
+  #orbitView .widget-icon { top: 12px; right: 12px; width: 30px; height: 30px; }
+  #orbitView .overview-value { font-size: 23px; }
+  #orbitView .overview-label { font-size: 8.5px; }
+  #orbitView .overview-detail { font-size: 10px; }
+  #orbitView .settings-column,
+  #orbitView .opportunity-grid { grid-template-columns: 1fr; }
+  #orbitView .settings-column .panel:last-child { grid-column: auto; }
+  #orbitView .panel { padding: 16px; border-radius: 18px; }
+  #orbitView .results-summary { flex-direction: column; align-items: stretch; }
+  #orbitView .results-total { font-size: 22px; }
+  #orbitView .tle-update-status { width: 100%; margin-left: 0; }
+  #orbitView .group-editor { grid-template-columns: 1fr 1fr; }
+  #orbitView .group-editor > :first-child { grid-column: 1 / -1; }
+  #orbitView .vis-grid { gap: 14px; }
+  #antView .container { padding-bottom: 26px; }
+  #antView header.app-header { padding: 18px; border-radius: 20px; }
+  #antView .radar { width: 42px; height: 42px; }
+  #antView header.app-header::before { display: none; }
+  #antView .card { padding: 17px; border-radius: 19px; }
+  #antView .result-grid { grid-template-columns: 1fr 1fr; }
+  #antView .data-table { font-size: 10px; }
+  #antView .tabs { border-radius: 12px; }
+  #antView .tab-btn { padding: 8px 11px; font-size: 11px; }
+  #antView .point-entry input { width: 132px; }
+  #toast {
+    top: auto;
+    right: 10px;
+    bottom: 16px;
+    left: 10px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 460px) {
+  #orbitView .overview-card { min-height: 104px; }
+  .nav-clock { display: none; }
+  #antView .result-grid { grid-template-columns: 1fr; }
+  #orbitView .orbit-scope { width: 62px; height: 62px; }
+}
+
+@media (max-width: 359px) {
+  #orbitView .mission-overview { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+  body::after { animation: none; }
+  #spaceBg, #spaceFx { transition: none; }
+  .mac-reveal { opacity: 1; }
+}
+
+</style>
 </head>
 <body>
 
@@ -1132,13 +4603,86 @@
 <!-- 背景：环绕地球的轨道与卫星（逐帧动画） -->
 <canvas id="spaceFx"></canvas>
 
-<!-- ===== 顶部功能菜单：一级 / 二级 ===== -->
-<nav class="app-nav">
-  <button type="button" class="nav-item active" id="navOrbit">过境预报</button>
-  <div class="nav-drop">
-    <button type="button" class="nav-item" id="navTools" aria-haspopup="true" aria-expanded="false">工具<span class="caret">▼</span></button>
-    <div class="nav-sub" id="navToolsSub">
-      <button type="button" class="nav-sub-item" id="navAntenna">天线指标测试工具</button>
+<!-- ===== macOS 菜单栏：交通灯 / 应用标识 / 视图 / 状态 ===== -->
+<nav class="app-nav" aria-label="主导航">
+  <div class="mac-traffic" aria-hidden="true">
+    <span class="mac-light mac-close"></span>
+    <span class="mac-light mac-min"></span>
+    <span class="mac-light mac-zoom"></span>
+  </div>
+  <div class="app-identity">
+    <span class="app-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="2.7" fill="currentColor"/>
+        <ellipse cx="12" cy="12" rx="9" ry="3.9" transform="rotate(-28 12 12)" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="19.4" cy="7.1" r="1.35" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="app-wordmark">ORBIT</span>
+    <span class="app-subtitle">任务控制台</span>
+  </div>
+  <div class="nav-menu" role="group" aria-label="视图切换">
+    <button type="button" class="nav-item active" id="navOrbit">过境预报</button>
+    <div class="nav-drop">
+      <button type="button" class="nav-item" id="navTools" aria-haspopup="true" aria-expanded="false">工具<span class="caret">▾</span></button>
+      <div class="nav-sub" id="navToolsSub">
+        <button type="button" class="nav-sub-item" id="navAntenna">天线指标测试工具</button>
+      </div>
+    </div>
+  </div>
+  <div class="nav-status">
+    <span class="nav-live" title="系统在线"><span class="nav-live-dot"></span><span class="nav-live-text">ONLINE</span></span>
+    <span class="nav-clock" title="北京时间 UTC+8"><span id="macClock">--:--</span><span class="nav-clock-sec" id="macClockSec">:--</span></span>
+    <button type="button" class="cc-trigger" id="ccTrigger" aria-expanded="false" aria-controls="controlCenter" aria-label="控制中心" title="控制中心">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <path d="M4 8h8.5M17 8h3M4 16h3M11.5 16H20"/>
+        <circle cx="15" cy="8" r="2.1"/>
+        <circle cx="9" cy="16" r="2.1"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- macOS 控制中心 -->
+  <div class="control-center" id="controlCenter" aria-hidden="true">
+    <div class="cc-head">
+      <span class="cc-title">控制中心</span>
+      <span class="cc-sub">外观与动效</span>
+    </div>
+    <div class="cc-grid">
+      <button type="button" class="cc-tile is-on" id="ccWallpaper" aria-pressed="true">
+        <span class="cc-icon cc-icon-blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="4.5" width="17" height="15" rx="3"/>
+            <circle cx="8.3" cy="9.2" r="1.5"/>
+            <path d="M4.5 17.2 9.4 12l3.2 3.1 2.8-2.9 4.1 4.3"/>
+          </svg>
+        </span>
+        <span class="cc-copy"><b>动态壁纸</b><small>星空与环绕轨道</small></span>
+        <span class="cc-switch" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="cc-tile is-on" id="ccGlass" aria-pressed="true">
+        <span class="cc-icon cc-icon-teal" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5c3.2 3.7 5.2 6.4 5.2 9.1A5.2 5.2 0 0 1 12 17.8a5.2 5.2 0 0 1-5.2-5.2c0-2.7 2-5.4 5.2-9.1Z"/>
+            <path d="M9.4 12.3a2.7 2.7 0 0 0 2.6 2.9"/>
+          </svg>
+        </span>
+        <span class="cc-copy"><b>玻璃质感</b><small>毛玻璃与通透层次</small></span>
+        <span class="cc-switch" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="cc-tile is-on" id="ccMotion" aria-pressed="true">
+        <span class="cc-icon cc-icon-purple" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 14.5c2.2-6.4 5.4-6.4 7.6 0s5.4 6.4 7.6 0"/>
+          </svg>
+        </span>
+        <span class="cc-copy"><b>界面动效</b><small>弹性过渡与视差</small></span>
+        <span class="cc-switch" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="cc-actions">
+      <button type="button" class="cc-action" id="ccFullscreen">进入全屏</button>
+      <button type="button" class="cc-action" id="ccReset">重置外观</button>
     </div>
   </div>
 </nav>
@@ -1155,29 +4699,53 @@
       <div class="orbit-scope" aria-hidden="true"></div>
       <div class="hero-meta-copy">
         <div class="live-signal"><span class="live-dot"></span> SYSTEM ONLINE</div>
-        <div class="hero-clock">TIME BASE · 北京时间 UTC+8</div>
+        <div class="hero-clock"><span class="hero-clock-label">TIME BASE · 北京时间</span><span class="hero-clock-time" id="heroClockTime">--:--:--</span></div>
         <div class="hero-status" id="orbitLiveStatus" aria-live="polite">等待轨道任务指令</div>
       </div>
     </div>
   </header>
 
   <section class="mission-overview" aria-label="任务概览">
-    <article class="overview-card">
+    <article class="overview-card" data-tone="blue">
+      <span class="widget-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21V9"/><path d="M8.2 9a5.4 5.4 0 0 1 7.6 0"/><path d="M5 6a10 10 0 0 1 14 0"/>
+          <circle cx="12" cy="9" r="1.5" fill="currentColor" stroke="none"/><path d="M8.5 21h7"/>
+        </svg>
+      </span>
       <span class="overview-label">ACTIVE STATIONS</span>
       <strong class="overview-value" id="orbitStationSummary">—</strong>
       <span class="overview-detail" id="orbitStationDetail">等待站址加载</span>
     </article>
-    <article class="overview-card">
+    <article class="overview-card" data-tone="purple">
+      <span class="widget-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9.6" y="9.6" width="4.8" height="4.8" rx="1.1" transform="rotate(45 12 12)"/>
+          <rect x="2.2" y="9.3" width="4.2" height="5.4" rx="1.1"/><rect x="17.6" y="9.3" width="4.2" height="5.4" rx="1.1"/>
+          <path d="M10 12H6.4M17.6 12H14M12 9.6V4.5M12 19.5v-5.1"/>
+        </svg>
+      </span>
       <span class="overview-label">TRACKED SATELLITES</span>
       <strong class="overview-value" id="orbitSatelliteSummary">—</strong>
       <span class="overview-detail" id="orbitSatelliteDetail">等待卫星库加载</span>
     </article>
-    <article class="overview-card is-accent">
+    <article class="overview-card is-accent" data-tone="teal">
+      <span class="widget-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8.2"/><path d="M12 7.2v5.1l3.2 1.9"/>
+        </svg>
+      </span>
       <span class="overview-label">PREDICTED WINDOWS</span>
       <strong class="overview-value" id="orbitWindowSummary">—</strong>
       <span class="overview-detail" id="orbitWindowDetail">尚未执行预报</span>
     </article>
-    <article class="overview-card">
+    <article class="overview-card" data-tone="orange">
+      <span class="widget-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18.2 8.6 10l4 5.4 2.6-3.6 5.8 6.4z"/>
+          <path d="M16.2 4.6v5.2M16.2 4.6l-2 2M16.2 4.6l2 2"/>
+        </svg>
+      </span>
       <span class="overview-label">PEAK ELEVATION</span>
       <strong class="overview-value" id="orbitQualitySummary">—</strong>
       <span class="overview-detail" id="orbitQualityDetail">等待有效轨迹</span>
@@ -1231,8 +4799,7 @@
   </h2>
   <!-- 工具栏：始终可见，不受收起/展开影响 -->
   <div class="row sat-toolbar">
-    <input type="text" id="satSearch" placeholder="搜索卫星：别名 / 名称 / NORAD 编号"
-      style="flex:1;max-width:300px;padding:7px 10px;font-size:0.8rem;"
+    <input type="text" id="satSearch" class="sat-search" placeholder="搜索卫星：别名 / 名称 / NORAD 编号"
       onkeydown="if(event.key==='Enter'){applySatSearch();}">
     <select id="satGroupFilter" class="group-filter" onchange="setSatGroupFilter(this.value)" aria-label="按卫星分组筛选">
       <option value="">全部分组</option>
@@ -1242,10 +4809,7 @@
     <button class="ghost tiny" onclick="selectSearchResults()">选中匹配项</button>
     <button class="ghost tiny" id="btnSelectAll" onclick="toggleSelectAll()">全选</button>
     <button class="ghost tiny" onclick="exportConfig()">导出配置</button>
-    <label class="ghost tiny" style="padding:4px 10px;border:1px solid #1b3853;border-radius:4px;
-      cursor:pointer;color:#9db8d0;font-size:0.75rem;margin:0;display:inline-block;"
-      onmouseover="this.style.background='#10263d';this.style.color='#d7e6f5';"
-      onmouseout="this.style.background='transparent';this.style.color='#9db8d0';">
+    <label class="ghost tiny file-btn">
       导入配置
       <input type="file" accept=".json" style="display:none;" onchange="importConfig(event)">
     </label>
@@ -1353,10 +4917,7 @@
 <!-- 结果 -->
 <div class="panel">
   <h2>过境窗口（北京时间 · 按入境时间排序）
-    <button id="btnExportExcel" onclick="exportExcel()" disabled
-      style="margin-left:auto;padding:6px 14px;font-size:0.8rem;background:#15803d;border:none;border-radius:6px;color:#fff;cursor:pointer;"
-      onmouseover="if(!this.disabled)this.style.background='#16a34a'"
-      onmouseout="if(!this.disabled)this.style.background='#15803d'">导出 Excel</button>
+    <button id="btnExportExcel" class="export-btn" onclick="exportExcel()" disabled>导出 Excel</button>
   </h2>
   <div id="results"><div class="empty">勾选卫星后点击"开始预报"</div></div>
 </div>
@@ -1982,6 +5543,36 @@
 </div>
 
 <div id="toast"></div>
+</div>
+
+<!-- ===== macOS Dock ===== -->
+<div class="mac-dock" id="macDock" role="toolbar" aria-label="应用 Dock">
+  <button type="button" class="dock-item is-active" data-target="orbit" data-label="过境预报" aria-label="过境预报">
+    <span class="dock-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+        <ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(-28 12 12)" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="19.4" cy="7.1" r="1.3" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="dock-dot" aria-hidden="true"></span>
+  </button>
+  <button type="button" class="dock-item" data-target="antenna" data-label="天线测试工具" aria-label="天线指标测试工具">
+    <span class="dock-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.4"/><path d="M12 12l6.2-6.2"/><circle cx="17.2" cy="8.2" r="1.35" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <span class="dock-dot" aria-hidden="true"></span>
+  </button>
+  <span class="dock-sep" aria-hidden="true"></span>
+  <button type="button" class="dock-item" data-action="top" data-label="回到顶部" aria-label="回到顶部">
+    <span class="dock-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5M6 11l6-6 6 6"/>
+      </svg>
+    </span>
+  </button>
 </div>
 
 <script src="lib/satellite.min.js"></script>
@@ -6251,5 +9842,550 @@ if (typeof document !== "undefined") {
 })();
 </script>
 
+<script id="macos-enhance">
+/* ==========================================================================
+   ORBIT · macOS Aurora enhancements
+   时钟、控制中心、分段指示器、滚动揭示、视差、Dock、数值反馈。
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var PREF_KEY = "orbit_mac_appearance_v1";
+  var OS_REDUCE = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  var DEFAULTS = {
+    wallpaper: !OS_REDUCE,
+    glass: true,
+    motion: !OS_REDUCE
+  };
+
+  function readPrefs() {
+    try {
+      var raw = localStorage.getItem(PREF_KEY);
+      if (!raw) return {};
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function savePrefs() {
+    try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (err) { /* 忽略隐私模式限制 */ }
+  }
+
+  var prefs = Object.assign({}, DEFAULTS, readPrefs());
+  var body = document.body;
+
+  function motionOn() { return prefs.motion; }
+  function applyMotion() {
+    body.classList.toggle("motion-off", !prefs.motion);
+    if (!prefs.motion) {
+      document.documentElement.style.setProperty("--bg-px", "0px");
+      document.documentElement.style.setProperty("--bg-py", "0px");
+      resetDockScale();
+    }
+  }
+  function applyGlass() {
+    body.classList.toggle("glass-off", !prefs.glass);
+  }
+
+  applyMotion();
+  applyGlass();
+
+  /* ============================ 北京时间 ============================ */
+  var WEEK = ["日", "一", "二", "三", "四", "五", "六"];
+  var clockTimer = null;
+
+  function pad2(n) { return n < 10 ? "0" + n : String(n); }
+
+  function updateClocks() {
+    var bj = new Date(Date.now() + 8 * 3600 * 1000);
+    var hh = pad2(bj.getUTCHours());
+    var mm = pad2(bj.getUTCMinutes());
+    var ss = pad2(bj.getUTCSeconds());
+    var main = document.getElementById("macClock");
+    var sec = document.getElementById("macClockSec");
+    var hero = document.getElementById("heroClockTime");
+    var clockWrap = main && main.parentElement;
+    if (main) main.textContent = hh + ":" + mm;
+    if (sec) sec.textContent = ":" + ss;
+    if (hero) hero.textContent = hh + ":" + mm + ":" + ss;
+    if (clockWrap) {
+      clockWrap.title = "北京时间 " + bj.getUTCFullYear() + "/" + pad2(bj.getUTCMonth() + 1) + "/" +
+        pad2(bj.getUTCDate()) + " 周" + WEEK[bj.getUTCDay()] + " " + hh + ":" + mm + ":" + ss;
+    }
+  }
+
+  function startClock() {
+    updateClocks();
+    if (clockTimer) clearInterval(clockTimer);
+    clockTimer = setInterval(updateClocks, 1000);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) updateClocks();
+    });
+  }
+
+  /* ============================ 壁纸开关 ============================ */
+  var bgPausedAt = 0;
+
+  function applyWallpaper() {
+    body.classList.toggle("wallpaper-paused", !prefs.wallpaper);
+    if (typeof BG === "undefined" || !BG || !BG.cvS) return;
+
+    if (!prefs.wallpaper) {
+      if (BG.raf) {
+        cancelAnimationFrame(BG.raf);
+        BG.raf = null;
+      }
+      bgPausedAt = performance.now();
+      return;
+    }
+
+    if (bgPausedAt) {
+      BG.t0 += performance.now() - bgPausedAt;
+      bgPausedAt = 0;
+    }
+    if (!BG.raf && !document.hidden && typeof spaceFrame === "function") {
+      BG.reduced = false;
+      BG.last = 0;
+      BG.raf = requestAnimationFrame(spaceFrame);
+    }
+  }
+
+  /* ============================ 控制中心 ============================ */
+  var cc = null;
+  var ccTrigger = null;
+  var ccTiles = [];
+  var ccMap = {};
+
+  function setControlCenter(open) {
+    if (!cc || !ccTrigger) return;
+    cc.classList.toggle("open", open);
+    cc.setAttribute("aria-hidden", open ? "false" : "true");
+    ccTrigger.classList.toggle("active", open);
+    ccTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function syncControlCenter() {
+    ccTiles.forEach(function (tile) {
+      var key = tile.getAttribute("data-pref");
+      var on = !!prefs[key];
+      tile.classList.toggle("is-on", on);
+      tile.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    var fs = document.getElementById("ccFullscreen");
+    if (fs) fs.textContent = document.fullscreenElement ? "退出全屏" : "进入全屏";
+  }
+
+  function togglePref(key) {
+    prefs[key] = !prefs[key];
+    savePrefs();
+    syncControlCenter();
+    if (key === "glass") applyGlass();
+    if (key === "motion") applyMotion();
+    if (key === "wallpaper") applyWallpaper();
+  }
+
+  function bindControlCenter() {
+    cc = document.getElementById("controlCenter");
+    ccTrigger = document.getElementById("ccTrigger");
+    if (!cc || !ccTrigger) return;
+
+    ccTiles = $$(".cc-tile", cc);
+    ccMap = {
+      ccWallpaper: "wallpaper",
+      ccGlass: "glass",
+      ccMotion: "motion"
+    };
+    ccTiles.forEach(function (tile) { tile.setAttribute("data-pref", ccMap[tile.id]); });
+
+    ccTiles.forEach(function (tile) {
+      tile.addEventListener("click", function () { togglePref(tile.getAttribute("data-pref")); });
+    });
+
+    ccTrigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setControlCenter(!cc.classList.contains("open"));
+    });
+    cc.addEventListener("click", function (e) { e.stopPropagation(); });
+    document.addEventListener("click", function () { setControlCenter(false); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setControlCenter(false);
+    });
+
+    var fsBtn = document.getElementById("ccFullscreen");
+    if (fsBtn) {
+      fsBtn.addEventListener("click", function () {
+        try {
+          if (!document.fullscreenElement) {
+            var req = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+            if (req && req.catch) req.catch(function () {});
+          } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        } catch (err) { /* 某些浏览器/内嵌环境不允许全屏 */ }
+      });
+    }
+    document.addEventListener("fullscreenchange", syncControlCenter);
+
+    var resetBtn = document.getElementById("ccReset");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        prefs = Object.assign({}, DEFAULTS);
+        try { localStorage.removeItem(PREF_KEY); } catch (err) {}
+        applyMotion();
+        applyGlass();
+        applyWallpaper();
+        syncControlCenter();
+        if (cc) {
+          cc.classList.add("is-reset");
+          setTimeout(function () { cc.classList.remove("is-reset"); }, 500);
+        }
+      });
+    }
+    syncControlCenter();
+  }
+
+  /* ============================ 分段控件滑块 ============================ */
+  function setupSegmented(container, itemSelector) {
+    if (!container || container.getAttribute("data-seg-ready") === "1") return;
+    container.setAttribute("data-seg-ready", "1");
+
+    var thumb = document.createElement("span");
+    thumb.className = "seg-thumb";
+    thumb.setAttribute("aria-hidden", "true");
+    container.insertBefore(thumb, container.firstChild);
+    container.classList.add("has-thumb");
+
+    var raf = null;
+    var move = function () {
+      if (!container.offsetParent) return;
+      var active = container.querySelector(itemSelector + ".active");
+      if (!active) return;
+      thumb.style.width = active.offsetWidth + "px";
+      thumb.style.transform = "translateX(" + active.offsetLeft + "px)";
+    };
+    var schedule = function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = null; move(); });
+    };
+
+    container.addEventListener("click", function () {
+      setTimeout(function () {
+        schedule();
+        if (container.classList.contains("tabs")) {
+          var active = container.querySelector(itemSelector + ".active");
+          if (active && active.scrollIntoView) {
+            active.scrollIntoView({ block: "nearest", inline: "nearest", behavior: motionOn() ? "smooth" : "auto" });
+          }
+        }
+      }, 0);
+    });
+    container.addEventListener("scroll", move, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(schedule).observe(container);
+    if (window.MutationObserver) {
+      new MutationObserver(schedule).observe(container, { attributes: true, attributeFilter: ["class"], subtree: true });
+    }
+    window.addEventListener("resize", schedule);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+    setTimeout(schedule, 30);
+    setTimeout(schedule, 300);
+  }
+
+  function setupAllSegmented() {
+    var tabs = $(".tabs");
+    if (tabs) setupSegmented(tabs, ".tab-btn");
+    var seg = $("#eirpMethodSeg");
+    if (seg) setupSegmented(seg, ".seg-btn");
+  }
+
+  /* ============================ 滚动揭示 ============================ */
+  function setupReveal() {
+    var targets = $$(
+      "#orbitView .overview-card, #orbitView .panel, #antView .card, #antView header.app-header"
+    );
+    if (!targets.length) return;
+
+    targets.forEach(function (el, index) {
+      el.classList.add("mac-reveal");
+      var delay = 0;
+      if (el.classList.contains("overview-card")) {
+        delay = index * 65;
+      } else {
+        var parent = el.parentElement;
+        var siblings = parent ? $$(".mac-reveal", parent) : [];
+        delay = Math.min(240, Math.max(0, siblings.indexOf(el)) * 55);
+      }
+      el.style.setProperty("--reveal-delay", delay + "ms");
+    });
+
+    if (!("IntersectionObserver" in window) || OS_REDUCE) {
+      targets.forEach(function (el) { el.classList.add("is-revealed"); });
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.06, rootMargin: "0px 0px -6% 0px" });
+
+    targets.forEach(function (el) { io.observe(el); });
+
+    /* 极端情况下（例如元素在隐藏面板里一直未进入视口）的兜底：不隐藏内容 */
+    window.setTimeout(function () {
+      targets.forEach(function (el) {
+        if (!el.classList.contains("is-revealed") && el.offsetParent !== null) {
+          var rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) el.classList.add("is-revealed");
+        }
+      });
+    }, 2600);
+  }
+
+  /* ============================ 指针聚光 ============================ */
+  function bindSpotlight(el) {
+    el.addEventListener("pointermove", function (e) {
+      if (!motionOn() || e.pointerType === "touch") return;
+      var rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      el.style.setProperty("--mx", (((e.clientX - rect.left) / rect.width) * 100).toFixed(2) + "%");
+      el.style.setProperty("--my", (((e.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%");
+    }, { passive: true });
+    el.addEventListener("pointerleave", function () {
+      el.style.setProperty("--mx", "50%");
+      el.style.setProperty("--my", "0%");
+    });
+  }
+
+  /* ============================ Dock ============================ */
+  var dock = null;
+  var dockItems = [];
+  var dockCenters = [];
+  var dockBounceTimers = [];
+
+  function resetDockScale() {
+    if (!dockItems || !dockItems.length) return;
+    dockItems.forEach(function (item) { item.style.setProperty("--dock-scale", "1"); });
+  }
+
+  function cacheDockCenters() {
+    if (!dock) return;
+    dockCenters = dockItems.map(function (item) {
+      var rect = item.getBoundingClientRect();
+      return rect.left + rect.width / 2;
+    });
+  }
+
+  function setDockActive(view) {
+    dockItems.forEach(function (item) {
+      if (item.getAttribute("data-target")) {
+        item.classList.toggle("is-active", item.getAttribute("data-target") === view);
+      }
+    });
+  }
+
+  /* 视图切换时同步顶部菜单与 Dock：天线视图里高亮「工具」而不是让一级菜单失去选中态 */
+  function syncTopNav() {
+    var orbitView = document.getElementById("orbitView");
+    var antView = document.getElementById("antView");
+    var orbitBtn = document.getElementById("navOrbit");
+    var toolsBtn = document.getElementById("navTools");
+    var ant = !!(antView && antView.style.display !== "none");
+    if (orbitBtn) orbitBtn.classList.toggle("active", !ant);
+    if (toolsBtn) toolsBtn.classList.toggle("active", ant);
+    setDockActive(ant ? "antenna" : "orbit");
+    setControlCenter(false);
+  }
+
+  function bindDock() {
+    dock = document.getElementById("macDock");
+    if (!dock) return;
+    dockItems = $$(".dock-item", dock);
+    cacheDockCenters();
+
+    dock.addEventListener("pointermove", function (e) {
+      if (!motionOn() || e.pointerType === "touch") return;
+      if (!dockCenters.length) cacheDockCenters();
+      dockItems.forEach(function (item, i) {
+        var center = dockCenters[i];
+        if (center == null) return;
+        var d = (e.clientX - center) / 78;
+        var scale = 1 + 0.4 * Math.exp(-d * d);
+        item.style.setProperty("--dock-scale", scale.toFixed(3));
+      });
+    }, { passive: true });
+
+    dock.addEventListener("pointerleave", resetDockScale);
+    window.addEventListener("blur", resetDockScale);
+    window.addEventListener("resize", function () {
+      resetDockScale();
+      cacheDockCenters();
+    });
+
+    dockItems.forEach(function (item, index) {
+      item.addEventListener("click", function () {
+        var target = item.getAttribute("data-target");
+        var action = item.getAttribute("data-action");
+
+        if (target === "orbit") {
+          var orbitBtn = document.getElementById("navOrbit");
+          if (orbitBtn) orbitBtn.click();
+        } else if (target === "antenna") {
+          var antBtn = document.getElementById("navAntenna");
+          if (antBtn) antBtn.click();
+        } else if (action === "top") {
+          window.scrollTo({ top: 0, behavior: motionOn() ? "smooth" : "auto" });
+        }
+
+        if (!motionOn()) return;
+        item.classList.remove("is-bouncing");
+        void item.offsetWidth;
+        item.classList.add("is-bouncing");
+        clearTimeout(dockBounceTimers[index]);
+        dockBounceTimers[index] = setTimeout(function () {
+          item.classList.remove("is-bouncing");
+        }, 620);
+      });
+    });
+
+    var navOrbit = document.getElementById("navOrbit");
+    var navAntenna = document.getElementById("navAntenna");
+    if (navOrbit) navOrbit.addEventListener("click", syncTopNav);
+    if (navAntenna) navAntenna.addEventListener("click", syncTopNav);
+  }
+
+  /* ============================ 背景视差 ============================ */
+  var bgRaf = null;
+  var bgX = 0;
+  var bgY = 0;
+
+  function bindParallax() {
+    window.addEventListener("pointermove", function (e) {
+      if (!motionOn() || e.pointerType === "touch") return;
+      bgX = (e.clientX / Math.max(1, window.innerWidth) - 0.5) * 16;
+      bgY = (e.clientY / Math.max(1, window.innerHeight) - 0.5) * 12;
+      if (bgRaf) return;
+      bgRaf = requestAnimationFrame(function () {
+        bgRaf = null;
+        document.documentElement.style.setProperty("--bg-px", bgX.toFixed(2) + "px");
+        document.documentElement.style.setProperty("--bg-py", bgY.toFixed(2) + "px");
+      });
+    }, { passive: true });
+
+    window.addEventListener("blur", function () {
+      bgX = 0;
+      bgY = 0;
+      document.documentElement.style.setProperty("--bg-px", "0px");
+      document.documentElement.style.setProperty("--bg-py", "0px");
+    });
+  }
+
+  /* ============================ 数值变化反馈 ============================ */
+  var FLASH_SELECTOR = [
+    "#orbitStationSummary",
+    "#orbitSatelliteSummary",
+    "#orbitWindowSummary",
+    "#orbitQualitySummary",
+    "#orbitView .results-total",
+    "#antView .result-box .r-value",
+    "#antView .record-values",
+    "#orbitView .panel h2 .badge"
+  ].join(",");
+
+  function flashValue(el) {
+    if (!motionOn() || !el) return;
+    el.classList.remove("value-flash");
+    void el.offsetWidth;
+    el.classList.add("value-flash");
+  }
+
+  function bindValueFlash() {
+    if (!window.MutationObserver) return;
+    var seen = new Set();
+    var mo = new MutationObserver(function (mutations) {
+      seen.clear();
+      mutations.forEach(function (m) {
+        var candidates = [];
+        if (m.type === "characterData") {
+          candidates.push(m.target.parentElement);
+        } else if (m.type === "childList") {
+          Array.prototype.forEach.call(m.addedNodes, function (node) {
+            candidates.push(node.nodeType === 1 ? node : node.parentElement);
+          });
+          if (m.target && m.target.nodeType === 1) candidates.push(m.target);
+        }
+        candidates.forEach(function (node) {
+          if (!node || !node.closest) return;
+          var hit = node.closest(FLASH_SELECTOR);
+          if (!hit || seen.has(hit)) return;
+          seen.add(hit);
+          flashValue(hit);
+        });
+      });
+    });
+    mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  /* 通知语气：需要先操作 / 出错的提示用橙色感叹号，其余用蓝色勾选 */
+  function bindToastTone() {
+    var toast = document.getElementById("toast");
+    if (!toast || !window.MutationObserver) return;
+    var sync = function () {
+      var text = toast.textContent || "";
+      var warn = /请先|失败|错误|无法|不能|请填|请选择|超出|无效|未配置/.test(text);
+      toast.classList.toggle("is-warn", warn);
+    };
+    new MutationObserver(sync).observe(toast, { childList: true, characterData: true, subtree: true });
+    sync();
+  }
+
+  /* ============================ 启动 ============================ */
+  function init() {
+    startClock();
+    bindControlCenter();
+    setupAllSegmented();
+    setupReveal();
+    bindDock();
+    bindParallax();
+    bindValueFlash();
+    bindToastTone();
+    applyWallpaper();
+
+    var hero = document.querySelector("#orbitView .mission-hero");
+    if (hero) bindSpotlight(hero);
+    $$("#orbitView .overview-card").forEach(bindSpotlight);
+
+    /* 视图切换后备同步（除了点击 Dock / 菜单，还覆盖以后可能新增的入口） */
+    var orbitView = document.getElementById("orbitView");
+    var antView = document.getElementById("antView");
+    if (window.MutationObserver) {
+      var viewMo = new MutationObserver(function () { syncTopNav(); });
+      if (orbitView) viewMo.observe(orbitView, { attributes: true, attributeFilter: ["style"] });
+      if (antView) viewMo.observe(antView, { attributes: true, attributeFilter: ["style"] });
+    }
+    syncTopNav();
+
+    /* 键盘快捷入口：⌘/Ctrl + K 打开控制中心 */
+    document.addEventListener("keydown", function (e) {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setControlCenter(true);
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+</script>
 </body>
 </html>
